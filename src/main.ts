@@ -20,7 +20,7 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 
 let fluidsynthArgs = "-r 48000 --gain 2 --o synth.polyphony=4";
 if (os.type() === "Linux") {
-  fluidsynthArgs += "--audio-driver=alsa ";
+  fluidsynthArgs += " --audio-driver=alsa ";
 }
 const aconnectArgs = "16:0 128:0";
 const soundfonts = fs.readdirSync(path.join(__dirname, "..", "soundfonts"));
