@@ -1,5 +1,6 @@
 import cp from "child_process";
 import chalk from "chalk";
+import os from "os";
 
 export function startFluidSynth(
   fluidsynthArgs: string,
@@ -20,7 +21,9 @@ export function startFluidSynth(
     const watcher = setInterval(() => {
       if (ready) {
         clearInterval(watcher);
-        // cp.execSync(`aconnect ${aconnectArgs}`);
+        if (os.type() === "Linux") {
+          cp.execSync(`aconnect ${aconnectArgs}`);
+        }
         resolve(fluidsynth);
       }
     }, 1000);
