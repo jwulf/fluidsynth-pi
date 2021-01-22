@@ -10,8 +10,10 @@ import fs from "fs";
 
 const server = http.createServer(app);
 import { Server } from "socket.io";
-import chalk from "chalk";
 const io = new Server(server);
+
+import chalk from "chalk";
+const log = (msg: string) => console.log(chalk.yellowBright(msg));
 
 app.use(express.static(path.join(__dirname, "..", "node_modules")));
 app.use(express.static(path.join(__dirname, "..", "public")));
@@ -27,12 +29,14 @@ if (os.type() === "Linux") {
 if (process.env.FLUIDSYNTH_ARGS) {
   fluidsynthArgs = process.env.FLUIDSYNTH_ARGS;
 }
+log(`FluidSynth args: ${fluidsynthArgs}`);
+
 const aconnectArgs = "16:0 128:0";
 const soundfonts = fs.readdirSync(path.join(__dirname, "..", "soundfonts"));
+log(`Found soundfonts: ${JSON.stringify(soundfonts)}`);
 let currentSoundfont = "Loft.sf2";
 let fontIndex = 1;
 
-const log = (msg: string) => console.log(chalk.yellowBright(msg));
 const fluidsynth = startFluidSynth(fluidsynthArgs, aconnectArgs);
 
 fluidsynth.then((fluidsynth) => {
