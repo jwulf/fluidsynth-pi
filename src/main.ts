@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+import cp from "child_process";
 import express from "express";
 const app = express();
 import http from "http";
@@ -95,5 +96,9 @@ io.on("connection", (client) => {
       f.kill();
       fluidsynth = initialiseFluidsynth();
     });
+  });
+  client.on("shutdown", () => {
+    log("Shutting down computer...");
+    cp.execSync("shutdown -h now");
   });
 });

@@ -64,6 +64,12 @@ $(document).on('vclick', '#restart', e => {
         socket.emit('restart_fluidsynth', true)
     }
 })
+$(document).on('vclick', '#shutdown', e => {
+    if (window.confirm('Shutdown computer?')) {
+        console.log('Sending shutdown command...')
+        socket.emit('shutdown', true)
+    }
+})
 $(document).on('vclick', '#instruments li a', e => {
     e.preventDefault()
     const target = $(e.target.parentElement)
