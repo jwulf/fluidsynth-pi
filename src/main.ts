@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 //   res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 // });
 
-let fluidsynthArgs = "-r 48000 --gain 2 --o synth.polyphony=4";
+let fluidsynthArgs = "-r 48000 --gain 2 --o synth.polyphony=16";
 if (os.type() === "Linux") {
   fluidsynthArgs += " --audio-driver=alsa ";
 }
