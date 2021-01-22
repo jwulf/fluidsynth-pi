@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 const app = express();
 import http from "http";
@@ -21,6 +23,9 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 let fluidsynthArgs = "-r 48000 --gain 2 --o synth.polyphony=16";
 if (os.type() === "Linux") {
   fluidsynthArgs += " --audio-driver=alsa ";
+}
+if (process.env.FLUIDSYNTH_ARGS) {
+  fluidsynthArgs = process.env.FLUIDSYNTH_ARGS;
 }
 const aconnectArgs = "16:0 128:0";
 const soundfonts = fs.readdirSync(path.join(__dirname, "..", "soundfonts"));
