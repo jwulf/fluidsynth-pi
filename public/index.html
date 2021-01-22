@@ -21,11 +21,19 @@
         <h1>[ fluid ]</h1>
       </div>
 
+      <div data-role="panel" id="logs">
+        <!-- panel content goes here -->
+        <button id="clearlogs">Clear</button>
+        <pre id="logstream"></pre>
+      </div>
       <div role="main" class="ui-content">
         <div class="ui-grid-solo">
           <ul id="instruments" data-role="listview" data-inset="true"></ul>
         </div>
+
         <div class="ui-grid-solo">
+          <button data-icon="info" id="viewlogs">View Logs</button>
+          <button data-icon="recycle" id="restart">Restart FluidSynth</button>
           <ul id="current" data-role="listview" data-inset="true"></ul>
         </div>
       </div>

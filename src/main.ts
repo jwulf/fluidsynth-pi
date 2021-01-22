@@ -13,7 +13,13 @@ import { Server } from "socket.io";
 const io = new Server(server);
 
 import chalk from "chalk";
-const log = (msg: string) => console.log(chalk.yellowBright(msg));
+import { RingLog } from "./ringlog";
+
+const ringlog = new RingLog(40);
+const log = (msg: string) => {
+  console.log(chalk.yellowBright(msg));
+  ringlog.log(msg);
+};
 
 app.use(express.static(path.join(__dirname, "..", "node_modules")));
 app.use(express.static(path.join(__dirname, "..", "public")));
@@ -37,20 +43,35 @@ log(`Found soundfonts: ${JSON.stringify(soundfonts)}`);
 let currentSoundfont = "Loft.sf2";
 let fontIndex = 1;
 
-const fluidsynth = startFluidSynth(fluidsynthArgs, aconnectArgs);
+let fluidsynth = initialiseFluidsynth();
 
-fluidsynth.then((fluidsynth) => {
+async function initialiseFluidsynth() {
+  const fluidsynth = await startFluidSynth(
+    fluidsynthArgs,
+    aconnectArgs,
+    ringlog
+  );
   console.log("Ready");
+  fontIndex = 1;
   const index = soundfonts.indexOf(currentSoundfont);
   const font = soundfonts[index];
   fluidsynth.stdin.write(`load soundfonts/${font}\n`);
   fluidsynth.stdin.write("fonts\n");
-  server.listen(3000);
-  log("Listening on port 3000");
-});
+  return fluidsynth;
+}
+
+server.listen(3000);
+log("Listening on port 3000");
 
 io.on("connection", (client) => {
   //   console.log("client connected");
+  client.emit("log", ringlog.messages.join("\n"));
+  const onLogMessage = (msg: string) => client.emit("log", msg);
+  ringlog.on("message", onLogMessage);
+
+  client.on("disconnection", () =>
+    ringlog.removeListener("message", onLogMessage)
+  );
   client.on("getinstruments", () =>
     io.emit("instrumentdump", {
       fonts: soundfonts,
@@ -65,6 +86,14 @@ io.on("connection", (client) => {
       currentSoundfont = font;
       fluidsynth.stdin.write(`load soundfonts/${font}\n`);
       fluidsynth.stdin.write(`fonts\n`);
+    });
+  });
+  client.on("restart_fluidsynth", () => {
+    log("Killing fluidsynth...");
+    fluidsynth.then((f) => {
+      ringlog.clear();
+      f.kill();
+      fluidsynth = initialiseFluidsynth();
     });
   });
 });

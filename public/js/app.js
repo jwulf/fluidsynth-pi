@@ -10,6 +10,12 @@ socket.on('reconnecting', function () {
     $.mobile.loading('show', { text: 'finding fluid', textVisible: true });
 })
 
+socket.on("log", message => {
+    console.log(message)
+    const text = ($("#logstream").text() || "") + message + '\n'
+    $("#logstream").text(text)
+})
+
 function getChannels() {
     socket.emit('getinstruments');
     socket.on('current', function (data) {
@@ -36,23 +42,37 @@ function getInstruments() {
         $("#instruments").listview("refresh");
         $('#instruments li a').removeClass('ui-btn-active');
         $('#instruments li a').each((_, e) => {
-            console.log(e)
-            if (e.innerHTML === instruments.currentSoundfont)
+            if (e.innerHTML === instruments.currentSoundfont) {
                 $(e).addClass('ui-btn-active');
+            }
         });
 
         $.mobile.loading('hide');
     });
 }
+
+$("#logs").panel();
+$(document).on('vclick', '#viewlogs', e => {
+    $("#logs").panel("open", {});
+})
+$(document).on('vclick', '#clearlogs', e => {
+    $("#logstream").text("")
+})
+$(document).on('vclick', '#restart', e => {
+    if (window.confirm('Restart Fluidsynth?')) {
+        console.log('Sending restart command...')
+        socket.emit('restart_fluidsynth', true)
+    }
+})
 $(document).on('vclick', '#instruments li a', e => {
     e.preventDefault()
     const target = $(e.target.parentElement)
     var index = $(target).attr('data-inum');
-    var iname = $(target).text();
+    // $(target).buttonMarkup({ icon: 'recycle' });
+    $("#instruments").listview("refresh");
+
     socket.emit('changeinst', index);
 
-    console.log('click ' + iname);
-    console.log(target)
     $('#instruments li a').removeClass('ui-btn-active');
     $(e.target).addClass('ui-btn-active');
 });
