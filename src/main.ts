@@ -148,5 +148,6 @@ async function restartFluidsynth() {
     ringlog.clear();
     f.kill();
     fluidsynth = initialiseFluidsynth();
+    soundfonts = initialiseSoundFonts();
   });
 }
