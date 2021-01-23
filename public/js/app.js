@@ -10,21 +10,6 @@ socket.on('reconnecting', function () {
     $.mobile.loading('show', { text: 'finding fluid', textVisible: true });
 })
 
-socket.on("log", message => {
-    console.log(message)
-    const text = ($("#logstream").text() || "") + message + '\n'
-    $("#logstream").text(text)
-    if (message.includes('load soundfonts')) {
-        // loading spinner on
-        $.mobile.loading('show', { text: 'loading soundfont', textVisible: true });
-
-    }
-    if (message.includes('loaded SoundFont has ID')) {
-        // loading spinner off        
-        $.mobile.loading('hide');
-    }
-})
-
 function getChannels() {
     socket.emit('getinstruments');
     socket.on('current', function (data) {
@@ -59,26 +44,7 @@ function getInstruments() {
         $.mobile.loading('hide');
     });
 }
-
-$("#logs").panel();
-$(document).on('vclick', '#viewlogs', e => {
-    $("#logs").panel("open", {});
-})
-$(document).on('vclick', '#clearlogs', e => {
-    $("#logstream").text("")
-})
-$(document).on('vclick', '#restart', e => {
-    if (window.confirm('Restart Fluidsynth?')) {
-        console.log('Sending restart command...')
-        socket.emit('restart_fluidsynth', true)
-    }
-})
-$(document).on('vclick', '#shutdown', e => {
-    if (window.confirm('Shutdown computer?')) {
-        console.log('Sending shutdown command...')
-        socket.emit('shutdown', true)
-    }
-})
+// Choose instrument
 $(document).on('vclick', '#instruments li a', e => {
     e.preventDefault()
     const target = $(e.target.parentElement)
@@ -91,3 +57,87 @@ $(document).on('vclick', '#instruments li a', e => {
     $('#instruments li a').removeClass('ui-btn-active');
     $(e.target).addClass('ui-btn-active');
 });
+
+
+// Logs
+$("#logs").panel();
+socket.on("log", message => {
+    console.log(message)
+    const text = ($("#logstream").text() || "") + message + '\n'
+    $("#logstream").text(text)
+    if (message.includes('load soundfonts')) {
+        // loading spinner on
+        $.mobile.loading('show', { text: 'loading soundfont', textVisible: true });
+    }
+    if (message.includes('loaded SoundFont has ID')) {
+        // loading spinner off        
+        $.mobile.loading('hide');
+    }
+})
+$(document).on('vclick', '#viewlogs', e => {
+    $("#logs").panel("open", {});
+})
+$(document).on('vclick', '#clearlogs', e => {
+    $("#logstream").text("")
+})
+
+// Upload
+$(document).on('vclick', '#upload', async _ => {
+    const pickerOpts = {
+        types: [
+            {
+                description: 'Soundfont',
+                accept: {
+                    'soundfont/*': ['.sf2']
+                }
+            },
+        ],
+        excludeAcceptAllOption: true,
+        multiple: false
+    };
+    const [file] = await window.showOpenFilePicker(pickerOpts)
+    // get file contents
+    const fileData = await file.getFile();
+    const form = new FormData()
+    form.append('soundfont', fileData)
+    const done = () => $.mobile.loading('hide');
+    $.mobile.loading('show', { text: `uploading ${file.name}`, textVisible: true });
+
+    $.ajax({
+        type: "POST",
+        enctype: 'multipart/form-data',
+        url: "/upload",
+        data: form,
+        processData: false,
+        contentType: false,
+        cache: false,
+        timeout: 800000,
+        success: res => {
+            console.log(res)
+            getInstruments()
+            done()
+        }
+        ,
+        error: error => {
+            alert(error)
+            done()
+        }
+    })
+
+})
+
+// Restart Fluidsynth
+$(document).on('vclick', '#restart', e => {
+    if (window.confirm('Restart Fluidsynth?')) {
+        console.log('Sending restart command...')
+        socket.emit('restart_fluidsynth', true)
+    }
+})
+
+// Shutdown
+$(document).on('vclick', '#shutdown', e => {
+    if (window.confirm('Shutdown computer?')) {
+        console.log('Sending shutdown command...')
+        socket.emit('shutdown', true)
+    }
+})
