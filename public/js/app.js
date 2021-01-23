@@ -14,6 +14,15 @@ socket.on("log", message => {
     console.log(message)
     const text = ($("#logstream").text() || "") + message + '\n'
     $("#logstream").text(text)
+    if (message.includes('load soundfonts')) {
+        // loading spinner on
+        $.mobile.loading('show', { text: 'loading soundfont', textVisible: true });
+
+    }
+    if (message.includes('loaded SoundFont has ID')) {
+        // loading spinner off        
+        $.mobile.loading('hide');
+    }
 })
 
 function getChannels() {
