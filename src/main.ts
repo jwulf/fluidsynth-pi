@@ -79,8 +79,11 @@ io.on("connection", (client) => {
       currentSoundfont,
     })
   );
-  client.on("changeinst", (index: number) => {
+  client.on("changeinst", async (index: number) => {
     log(`Changing to ${soundfonts[index]}...`);
+    if ((fontIndex = 22)) {
+      await restartFluidsynth();
+    }
     fluidsynth.then((fluidsynth) => {
       fluidsynth.stdin.write(`unload ${fontIndex++}\n`);
       const font = soundfonts[index];
@@ -89,16 +92,18 @@ io.on("connection", (client) => {
       fluidsynth.stdin.write(`fonts\n`);
     });
   });
-  client.on("restart_fluidsynth", () => {
-    log("Killing fluidsynth...");
-    fluidsynth.then((f) => {
-      ringlog.clear();
-      f.kill();
-      fluidsynth = initialiseFluidsynth();
-    });
-  });
+  client.on("restart_fluidsynth", restartFluidsynth);
   client.on("shutdown", () => {
     log("Shutting down computer...");
     cp.execSync("shutdown -h now");
   });
 });
+
+async function restartFluidsynth() {
+  log("Killing fluidsynth...");
+  fluidsynth.then((f) => {
+    ringlog.clear();
+    f.kill();
+    fluidsynth = initialiseFluidsynth();
+  });
+}
