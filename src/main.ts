@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 import cp from "child_process";
 import express from "express";
-const app = express();
 import http from "http";
 import { startFluidSynth } from "./fluidsynth";
 import path from "path";
@@ -10,9 +9,10 @@ import os from "os";
 import fs from "fs";
 import fileUpload from "express-fileupload";
 import bodyParser from "body-parser";
-
-const server = http.createServer(app);
 import { Server } from "socket.io";
+
+const app = express();
+const server = http.createServer(app);
 const io = new Server(server);
 
 import chalk from "chalk";
@@ -79,7 +79,7 @@ log(`FluidSynth args: ${fluidsynthArgs}`);
 
 const aconnectArgs = "16:0 128:0";
 let soundfonts = initialiseSoundFonts();
-let currentSoundfont = "Loft.sf2";
+let currentSoundfont = process.env.DEFAULT_SOUNDFONT || "Loft.sf2";
 let fontIndex = 1;
 
 let fluidsynth = initialiseFluidsynth();
