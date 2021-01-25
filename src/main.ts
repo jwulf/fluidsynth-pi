@@ -56,6 +56,7 @@ const lcdPrint = (msg: string, line: number) => {
     lcd.print((msg || "").padEnd(16, " "), line);
   }
 };
+lcdPrint("Starting...", 0);
 let fluidsynth = initialiseFluidsynth();
 
 function initialiseSoundFonts() {
