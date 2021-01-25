@@ -53,7 +53,7 @@ const lcd =
     : null;
 const lcdPrint = (msg: string, line: number) => {
   if (lcd) {
-    lcd.print((msg || "").padEnd(12, " "), line);
+    lcd.print((msg || "").padEnd(16, " "), line);
   }
 };
 let fluidsynth = initialiseFluidsynth();
@@ -119,7 +119,7 @@ io.on("connection", (client) => {
     if (loadedFontID === 22) {
       await restartFluidsynth();
     }
-    lcdPrint(`load ${font}`, 0);
+    lcdPrint(`loading...`, 0);
     fluidsynth.then((fluidsynth) => {
       fluidsynth.stdin.write(`unload ${loadedFontID++}\n`);
       currentSoundfont = font;
