@@ -3,10 +3,10 @@ export class LCD {
   lcd: any;
   constructor() {
     const five = require("johnny-five");
-    const raspi = require("raspi-io").RaspIO;
+    const Raspi = require("raspi-io").RaspiIO;
 
     console.log("Starting j5...");
-    this.board = new five.Board({ repl: false, io: new raspi() });
+    this.board = new five.Board({ repl: false, io: new Raspi() });
     this.board.on("ready", () => {
       console.log("Board ready...");
       this.lcd = new five.LCD({
