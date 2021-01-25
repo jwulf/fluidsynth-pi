@@ -53,7 +53,7 @@ const lcd =
     : null;
 const lcdPrint = (msg: string, line: number) => {
   if (lcd) {
-    lcd.print(msg.padEnd(12, " "), line);
+    lcd.print((msg || "").padEnd(12, " "), line);
   }
 };
 let fluidsynth = initialiseFluidsynth();
@@ -62,7 +62,7 @@ function initialiseSoundFonts() {
   const sf = fs.readdirSync(path.join(__dirname, "..", "soundfonts"));
   const defaultSoundfont = process.env.DEFAULT_SOUNDFONT;
   currentSoundfont =
-    defaultSoundfont && sf.indexOf(defaultSoundfont)
+    defaultSoundfont && sf.includes(defaultSoundfont)
       ? defaultSoundfont
       : "Loft.sf2";
   log(`Found soundfonts: \n * ${sf.join("\n * ")}`);
