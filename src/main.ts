@@ -42,7 +42,7 @@ app.post(
   uploadHandler(log, () => (soundfonts = initialiseSoundFonts()))
 );
 
-const aconnectArgs = "16:0 128:0";
+const aconnectArgs = process.env.ACONNECT_ARGS || "16:0 128:0";
 let soundfonts: string[];
 let currentSoundfont: string;
 let loadedFontID = 1;
@@ -72,7 +72,7 @@ function initialiseSoundFonts() {
 async function initialiseFluidsynth() {
   const defaultFluidsynthArgs =
     "-r 48000 --gain 2 --o synth.polyphony=16" + os.type() === "Linux"
-      ? " --audio-driver=alsa --o midi.autoconnect"
+      ? " --audio-driver=alsa"
       : "";
   const argsFromEnv = process.env.FLUIDSYNTH_ARGS;
   const fluidsynthArgs = argsFromEnv || defaultFluidsynthArgs;
