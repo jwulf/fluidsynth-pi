@@ -17,6 +17,8 @@ const io = new Server(server);
 
 import chalk from "chalk";
 import { RingLog } from "./ringlog";
+import { uploadHandler } from "./upload";
+import { LCD } from "./lcd";
 
 const ringlog = new RingLog(40);
 const log = (msg: string) => {
@@ -33,70 +35,51 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "..", "node_modules")));
 app.use(express.static(path.join(__dirname, "..", "public")));
-app.post("/upload", async (req, res) => {
-  try {
-    if (!req.files) {
-      res.send({
-        status: false,
-        message: "No file uploaded",
-      });
-    } else {
-      //Use the name of the input field (i.e. "avatar") to retrieve the uploaded file
-      let soundfont = req.files.soundfont as fileUpload.UploadedFile;
 
-      const name = soundfont.name.split(" ").join("_");
-      //Use the mv() method to place the file in soundfonts directory
-      await soundfont.mv(path.join(__dirname, "..", "soundfonts", name));
-
-      soundfonts = initialiseSoundFonts();
-
-      //send response
-      res.send({
-        status: true,
-        message: "File is uploaded",
-        data: {
-          name,
-          mimetype: soundfont.mimetype,
-          size: soundfont.size,
-        },
-      });
-      log(`Uploaded new soundfont: ${name}`);
-      // refresh soundfonts
-    }
-  } catch (err) {
-    res.status(500).send(err);
-  }
-});
-
-let fluidsynthArgs = "-r 48000 --gain 2 --o synth.polyphony=16";
-if (os.type() === "Linux") {
-  fluidsynthArgs += " --audio-driver=alsa ";
-}
-if (process.env.FLUIDSYNTH_ARGS) {
-  fluidsynthArgs = process.env.FLUIDSYNTH_ARGS;
-}
-log(`FluidSynth args: ${fluidsynthArgs}`);
+// Upload soundfont - have to figure out how to get this work on insecure domain
+app.post(
+  "/upload",
+  uploadHandler(log, () => (soundfonts = initialiseSoundFonts()))
+);
 
 const aconnectArgs = "16:0 128:0";
-let soundfonts = initialiseSoundFonts();
-let currentSoundfont = process.env.DEFAULT_SOUNDFONT || "Loft.sf2";
-let fontIndex = 1;
+let soundfonts: string[];
+let currentSoundfont: string;
+let loadedFontID = 1;
 
+const lcd = process.env.ENABLE_LCD ? new LCD() : null;
+const lcdPrint = (msg: string, line: number) => {
+  if (lcd) {
+    lcd.print(msg, line);
+  }
+};
 let fluidsynth = initialiseFluidsynth();
 
 function initialiseSoundFonts() {
+  currentSoundfont = process.env.DEFAULT_SOUNDFONT || "Loft.sf2";
   const sf = fs.readdirSync(path.join(__dirname, "..", "soundfonts"));
   log(`Found soundfonts: \n * ${sf.join("\n * ")}`);
   return sf;
 }
+
 async function initialiseFluidsynth() {
+  const defaultFluidsynthArgs =
+    "-r 48000 --gain 2 --o synth.polyphony=16" + os.type() === "Linux"
+      ? " --audio-driver=alsa "
+      : "";
+  const argsFromEnv = process.env.FLUIDSYNTH_ARGS;
+  const fluidsynthArgs = argsFromEnv || defaultFluidsynthArgs;
+
+  log(`FluidSynth args: ${fluidsynthArgs}`);
   const fluidsynth = await startFluidSynth(
     fluidsynthArgs,
     aconnectArgs,
     ringlog
   );
-  console.log("Ready");
-  fontIndex = 1;
+  log("Ready");
+  lcdPrint("Fluidsynth running", 1);
+  loadedFontID = 1;
+  soundfonts = initialiseSoundFonts();
   const index = soundfonts.indexOf(currentSoundfont);
   const font = soundfonts[index];
   fluidsynth.stdin.write(`load soundfonts/${font}\n`);
@@ -105,10 +88,9 @@ async function initialiseFluidsynth() {
 }
 
 server.listen(3000);
-log("Listening on port 3000");
+log("Webapp listening on port 3000");
 
 io.on("connection", (client) => {
-  //   console.log("client connected");
   client.emit("log", ringlog.messages.join("\n"));
   const onLogMessage = (msg: string) => client.emit("log", msg);
   ringlog.on("message", onLogMessage);
@@ -124,30 +106,32 @@ io.on("connection", (client) => {
   );
   client.on("changeinst", async (index: number) => {
     log(`Changing to ${soundfonts[index]}...`);
-    if ((fontIndex = 22)) {
+    if ((loadedFontID = 22)) {
       await restartFluidsynth();
     }
     fluidsynth.then((fluidsynth) => {
-      fluidsynth.stdin.write(`unload ${fontIndex++}\n`);
+      fluidsynth.stdin.write(`unload ${loadedFontID++}\n`);
       const font = soundfonts[index];
       currentSoundfont = font;
       fluidsynth.stdin.write(`load soundfonts/${font}\n`);
       fluidsynth.stdin.write(`fonts\n`);
+      lcdPrint(font, 0);
     });
   });
   client.on("restart_fluidsynth", restartFluidsynth);
   client.on("shutdown", () => {
     log("Shutting down computer...");
+    lcdPrint("Shutting done...", 1);
     cp.execSync("shutdown -h now");
   });
 });
 
 async function restartFluidsynth() {
   log("Killing fluidsynth...");
+  lcdPrint("Restart fluidsynth", 1);
   fluidsynth.then((f) => {
     ringlog.clear();
     f.kill();
     fluidsynth = initialiseFluidsynth();
-    soundfonts = initialiseSoundFonts();
   });
 }
