@@ -80,13 +80,14 @@ async function initialiseFluidsynth() {
     ringlog
   );
   log("Ready");
-  lcdPrint("Fluidsynth running", 1);
+  lcdPrint("fluidsynth on", 1);
   loadedFontID = 1;
   soundfonts = initialiseSoundFonts();
   const index = soundfonts.indexOf(currentSoundfont);
   const font = soundfonts[index];
   fluidsynth.stdin.write(`load soundfonts/${font}\n`);
   fluidsynth.stdin.write("fonts\n");
+  lcdPrint(font, 0);
   return fluidsynth;
 }
 
@@ -108,13 +109,15 @@ io.on("connection", (client) => {
     })
   );
   client.on("changeinst", async (index: number) => {
-    log(`Changing to ${soundfonts[index]}...`);
-    if ((loadedFontID = 22)) {
+    const font = soundfonts[index];
+
+    log(`Changing to ${font}...`);
+    if (loadedFontID === 22) {
       await restartFluidsynth();
     }
+    lcdPrint(`load ${font}`, 0);
     fluidsynth.then((fluidsynth) => {
       fluidsynth.stdin.write(`unload ${loadedFontID++}\n`);
-      const font = soundfonts[index];
       currentSoundfont = font;
       fluidsynth.stdin.write(`load soundfonts/${font}\n`);
       fluidsynth.stdin.write(`fonts\n`);
@@ -124,14 +127,14 @@ io.on("connection", (client) => {
   client.on("restart_fluidsynth", restartFluidsynth);
   client.on("shutdown", () => {
     log("Shutting down computer...");
-    lcdPrint("Shutting done...", 1);
+    lcdPrint("Shutdown...", 1);
     cp.execSync("shutdown -h now");
   });
 });
 
 async function restartFluidsynth() {
   log("Killing fluidsynth...");
-  lcdPrint("Restart fluidsynth", 1);
+  lcdPrint("restart synth", 1);
   fluidsynth.then((f) => {
     ringlog.clear();
     f.kill();
