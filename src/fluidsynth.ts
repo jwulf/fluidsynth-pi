@@ -18,7 +18,7 @@ export function startFluidSynth(
       console.log(chalk.green(data.toString()));
       ringlog.log(data.toString());
     });
-    fluidsynth.stderr.on("error", (error) => {
+    fluidsynth.stderr.on("data", (error) => {
       console.error(chalk.red(error.toString()));
       ringlog.log(error.toString());
     });
