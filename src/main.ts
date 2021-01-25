@@ -51,6 +51,7 @@ const lcd =
   (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new LCD()
     : null;
+log(`LCD ${lcd ? "enabled" : "disabled"}`);
 const lcdPrint = (msg: string, line: number) => {
   if (lcd) {
     lcd.print((msg || "").padEnd(16, " "), line);
