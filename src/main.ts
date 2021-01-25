@@ -84,7 +84,7 @@ async function initialiseFluidsynth() {
     ringlog
   );
   log("Ready");
-  lcdPrint("fluidsynth on", 1);
+  lcdPrint("", 1);
   loadedFontID = 1;
   soundfonts = initialiseSoundFonts();
   const index = soundfonts.indexOf(currentSoundfont);
