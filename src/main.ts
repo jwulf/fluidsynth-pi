@@ -53,14 +53,18 @@ const lcd =
     : null;
 const lcdPrint = (msg: string, line: number) => {
   if (lcd) {
-    lcd.print(msg, line);
+    lcd.print(msg.padEnd(12, " "), line);
   }
 };
 let fluidsynth = initialiseFluidsynth();
 
 function initialiseSoundFonts() {
-  currentSoundfont = process.env.DEFAULT_SOUNDFONT || "Loft.sf2";
   const sf = fs.readdirSync(path.join(__dirname, "..", "soundfonts"));
+  const defaultSoundfont = process.env.DEFAULT_SOUNDFONT;
+  currentSoundfont =
+    defaultSoundfont && sf.indexOf(defaultSoundfont)
+      ? defaultSoundfont
+      : "Loft.sf2";
   log(`Found soundfonts: \n * ${sf.join("\n * ")}`);
   return sf;
 }
@@ -68,7 +72,7 @@ function initialiseSoundFonts() {
 async function initialiseFluidsynth() {
   const defaultFluidsynthArgs =
     "-r 48000 --gain 2 --o synth.polyphony=16" + os.type() === "Linux"
-      ? " --audio-driver=alsa "
+      ? " --audio-driver=alsa --o midi.autoconnect"
       : "";
   const argsFromEnv = process.env.FLUIDSYNTH_ARGS;
   const fluidsynthArgs = argsFromEnv || defaultFluidsynthArgs;

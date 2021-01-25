@@ -25,9 +25,9 @@ export function startFluidSynth(
     const watcher = setInterval(() => {
       if (ready) {
         clearInterval(watcher);
-        if (os.type() === "Linux") {
-          cp.execSync(`aconnect ${aconnectArgs}`);
-        }
+        // if (os.type() === "Linux") {
+        //   cp.execSync(`aconnect ${aconnectArgs}`);
+        // }
         resolve(fluidsynth);
       }
     }, 1000);
