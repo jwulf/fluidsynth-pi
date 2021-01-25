@@ -72,7 +72,7 @@ function initialiseSoundFonts() {
 
 async function initialiseFluidsynth() {
   const defaultFluidsynthArgs =
-    "-r 48000 --gain 2 --o synth.polyphony=16" + os.type() === "Linux"
+    "-r 48000 --gain 3 --o synth.polyphony=16" + os.type() === "Linux"
       ? " --audio-driver=alsa"
       : "";
   const argsFromEnv = process.env.FLUIDSYNTH_ARGS;
