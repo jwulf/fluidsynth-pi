@@ -47,7 +47,10 @@ let soundfonts: string[];
 let currentSoundfont: string;
 let loadedFontID = 1;
 
-const lcd = process.env.ENABLE_LCD ? new LCD() : null;
+const lcd =
+  (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
+    ? new LCD()
+    : null;
 const lcdPrint = (msg: string, line: number) => {
   if (lcd) {
     lcd.print(msg, line);
