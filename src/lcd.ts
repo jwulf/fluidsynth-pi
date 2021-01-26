@@ -17,27 +17,20 @@ export class LCD {
         //    1      GND       6       GND
         //    2      VDD       1       +5V
         //    3      VO       pot      contrast
-        //    4      RS        12      GPIO18          Register Select
-        //    5      RW        14      GND
-        //    6      EN        16      GPIO23
+        //    4      RS        26      GPIO7           Register Select (instruction / data)
+        //    5      RW        14      GND             Read (high) / Write (low)
+        //    6      EN        24      GPIO8           Enable (writing to register)
         //    7      DB0       -       -
         //    8      DB1       -       -
         //    9      DB2       -       -
         //    10     DB3       -       -
-        //    11     DB4       18      GPIO24
-        //    12     DB5       13      GPIO27
-        //    13     DB6       22      GPIO25
-        //    14     DB7       15      GPIO22
+        //    11     DB4       22      GPIO25
+        //    12     DB5       18      GPIO24
+        //    13     DB6       16      GPIO23
+        //    14     DB7       12      GPIO18
         //    15     LED+      2       +5V
         //    16     LED-      20      GND
-
-        // rpi pins: ["6",    "2",  "pot", "12", "14", ]
-        // lcd pins:   ["RS",       "EN",     "DB4",   "DB5",   "DB6",    "DB7"]
-        // lcd pins:   [ 4,          6,        11,      12,       13,       14  ]
-        // raspi pins: ["GPIO18", "GPIO23", "GPIO24", "GPIO27", "GPIO25", "GPIO22"]
-        // raspi pins: ["12",       "16",     "18",   "13",     "22",      "15"]
-        // pins: ["GPIO18", "GPIO23", "GPIO24", "GPIO27", "GPIO25", "GPIO22"],
-        pins: ["GPIO1", "GPIO4", "GPIO5", "GPIO2", "GPIO6", "GPIO3"],
+        pins: ["GPIO7", "GPIO8", "GPIO25", "GPIO24", "GPIO23", "GPIO18"],
         backlight: 6,
         rows: 2,
         cols: 20,

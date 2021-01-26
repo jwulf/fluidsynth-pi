@@ -134,6 +134,7 @@ io.on("connection", (client) => {
   client.on("shutdown", () => {
     log("Shutting down computer...");
     lcdPrint("Shutdown...", 1);
+    lcd?.lcd.backlight().off();
     cp.execSync("shutdown -h now");
   });
 });
