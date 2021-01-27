@@ -14,7 +14,7 @@ export class Dial {
   constructor() {
     this.log = Log(chalk.greenBright);
     board().ready.then((board) => {
-      this.upButton = new five.Button("GPIO2");
+      this.upButton = new five.Button("GPIO4");
       this.downButton = new five.Button("GPIO3");
       this.pressButton = new five.Button({ pin: "GPIO6" });
       rotaryEncoder({
