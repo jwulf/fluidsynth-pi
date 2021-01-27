@@ -15,7 +15,7 @@ class Dial {
         board_1.board().ready.then((board) => {
             this.upButton = new johnny_five_1.default.Button("GPIO20");
             this.downButton = new johnny_five_1.default.Button("GPIO21");
-            this.pressButton = new johnny_five_1.default.Button("GPIO16");
+            this.pressButton = new johnny_five_1.default.Button({ pin: "GPIO16", invert: true });
             johnny_five_rotary_encoder_1.default({
                 upButton: this.upButton,
                 downButton: this.downButton,

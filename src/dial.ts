@@ -16,7 +16,7 @@ export class Dial {
     board().ready.then((board) => {
       this.upButton = new five.Button("GPIO20");
       this.downButton = new five.Button("GPIO21");
-      this.pressButton = new five.Button("GPIO16");
+      this.pressButton = new five.Button({ pin: "GPIO16", invert: true });
       rotaryEncoder({
         upButton: this.upButton,
         downButton: this.downButton,
