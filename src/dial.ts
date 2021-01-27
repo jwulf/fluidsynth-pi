@@ -14,9 +14,9 @@ export class Dial {
   constructor() {
     this.log = Log(chalk.greenBright);
     board().ready.then((board) => {
-      this.upButton = new five.Button(21);
-      this.downButton = new five.Button(20);
-      this.pressButton = new five.Button(16);
+      this.upButton = new five.Button(40);
+      this.downButton = new five.Button(38);
+      this.pressButton = new five.Button(36);
       rotaryEncoder({
         upButton: this.upButton,
         downButton: this.downButton,
