@@ -16,15 +16,12 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 import chalk from "chalk";
-import { RingLog } from "./ringlog";
+import { Log, ringlog } from "./ringlog";
 import { uploadHandler } from "./upload";
 import { LCD } from "./lcd";
+import { Dial } from "./dial";
 
-const ringlog = new RingLog(40);
-const log = (msg: string) => {
-  console.log(chalk.yellowBright(msg));
-  ringlog.log(msg);
-};
+const log = Log(chalk.yellowBright);
 
 app.use(
   fileUpload({
@@ -49,7 +46,11 @@ let loadedFontID = 1;
 
 const lcd =
   (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
-    ? new LCD(log)
+    ? new LCD()
+    : null;
+const _ =
+  (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
+    ? new Dial()
     : null;
 log(`LCD ${lcd ? "enabled" : "disabled"}`);
 const lcdPrint = (msg: string, line: number) => {
@@ -80,11 +81,7 @@ async function initialiseFluidsynth() {
   const fluidsynthArgs = argsFromEnv || defaultFluidsynthArgs;
 
   log(`FluidSynth args: ${fluidsynthArgs}`);
-  const fluidsynth = await startFluidSynth(
-    fluidsynthArgs,
-    aconnectArgs,
-    ringlog
-  );
+  const fluidsynth = await startFluidSynth(fluidsynthArgs, aconnectArgs);
   log("Ready");
   lcdPrint("", 1);
   loadedFontID = 1;

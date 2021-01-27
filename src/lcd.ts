@@ -1,15 +1,15 @@
+import chalk from "chalk";
 import five from "johnny-five";
+import { board } from "./board";
+import { Log } from "./ringlog";
 
 export class LCD {
-  board: any;
   lcd!: five.LCD;
-  constructor(private log: any) {
-    const Raspi = require("raspi-io").RaspiIO;
-
-    this.log("Starting j5...");
-    this.board = new five.Board({ repl: false, io: new Raspi() });
-    this.board.on("ready", () => {
-      this.log("Board ready...");
+  log: (msg: string) => void;
+  board: any;
+  constructor() {
+    this.log = Log(chalk.greenBright);
+    this.board = board().ready.then((board) => {
       this.lcd = new five.LCD({
         // pin layout for Zero W: https://pi4j.com/1.2/pins/model-zerow-rev1.html
         // lcd pins: ["GND", "VDD", "VO",  "RS", "RW", "EN", "DB0", "DB1", "DB2", "DB3", "DB4", "DB5", "DB6", "DB7", "LED+", "LED-"]

@@ -20,6 +20,7 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.2.1",
     "johnny-five": "^2.0.0",
+    "johnny-five-rotary-encoder": "^1.0.1",
     "raspi-io": "^11.0.0",
     "socket.io": "^3.1.0"
   },
