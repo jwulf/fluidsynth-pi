@@ -13,9 +13,9 @@ class Dial {
     constructor() {
         this.log = ringlog_1.Log(chalk_1.default.greenBright);
         board_1.board().ready.then((board) => {
-            this.upButton = new johnny_five_1.default.Button("GPIO4");
-            this.downButton = new johnny_five_1.default.Button("GPIO5");
-            this.pressButton = new johnny_five_1.default.Button({ pin: "GPIO6" });
+            this.upButton = new johnny_five_1.default.Button({ pin: "GPIO4", isPullup: true });
+            this.downButton = new johnny_five_1.default.Button({ pin: "GPIO5", isPullup: true });
+            this.pressButton = new johnny_five_1.default.Button({ pin: "GPIO6", isPullup: true });
             johnny_five_rotary_encoder_1.default({
                 upButton: this.upButton,
                 downButton: this.downButton,
