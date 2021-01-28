@@ -2,7 +2,6 @@ import chalk from "chalk";
 import five from "johnny-five";
 import { board } from "./board";
 import { Log } from "./ringlog";
-import rotaryEncoder from "johnny-five-rotary-encoder";
 
 export class Dial {
   dial!: five.LCD;
@@ -17,12 +16,10 @@ export class Dial {
       this.upButton = new five.Button({
         pin: "GPIO4",
         isPullup: true,
-        holdtime: 300,
       });
       this.downButton = new five.Button({
         pin: "GPIO5",
         isPullup: true,
-        holdtime: 300,
       });
       this.pressButton = new five.Button({ pin: "GPIO6", isPullup: true });
       rotaryEncoder({
@@ -40,5 +37,59 @@ export class Dial {
         },
       });
     });
+  }
+}
+
+function rotaryEncoder({
+  upButton,
+  downButton,
+  pressButton,
+  onUp,
+  onDown,
+  onPress,
+}: {
+  upButton: five.Button;
+  downButton: five.Button;
+  pressButton: five.Button;
+  onUp: () => void;
+  onDown: () => void;
+  onPress: () => void;
+}) {
+  let waveform = "";
+  let waveformTimeout: NodeJS.Timeout;
+
+  upButton.on("up", () => {
+    waveform += "1";
+    handleWaveform();
+  });
+
+  downButton.on("up", () => {
+    waveform += "0";
+    handleWaveform();
+  });
+
+  pressButton.on("up", () => {
+    onPress();
+  });
+
+  function handleWaveform() {
+    if (waveform.length < 2) {
+      waveformTimeout = setTimeout(() => {
+        waveform = "";
+      }, 8);
+      return;
+    }
+
+    if (waveformTimeout) {
+      clearTimeout(waveformTimeout);
+    }
+
+    if (waveform === "01") {
+      onUp();
+    } else if (waveform === "10") {
+      onDown();
+    }
+
+    waveform = "";
   }
 }
