@@ -14,8 +14,16 @@ export class Dial {
   constructor() {
     this.log = Log(chalk.greenBright);
     board().ready.then((board) => {
-      this.upButton = new five.Button({ pin: "GPIO4", isPullup: true });
-      this.downButton = new five.Button({ pin: "GPIO5", isPullup: true });
+      this.upButton = new five.Button({
+        pin: "GPIO4",
+        isPullup: true,
+        holdtime: 300,
+      });
+      this.downButton = new five.Button({
+        pin: "GPIO5",
+        isPullup: true,
+        holdtime: 300,
+      });
       this.pressButton = new five.Button({ pin: "GPIO6", isPullup: true });
       rotaryEncoder({
         upButton: this.upButton,
