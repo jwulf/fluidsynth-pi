@@ -18,15 +18,14 @@ function rotaryEncoder({
   onDown: () => void;
   onPress: () => void;
 }) {
-  aPin.on("low", () => {
+  const handler = () => {
     const bPinState = bPin.value;
-    console.log(`aPin: low, bPin: ${bPinState}`);
-  });
-
-  bPin.on("low", () => {
     const aPinState = aPin.value;
-    console.log(`bPin: low, aPin: ${aPinState}`);
-  });
+    console.log(`aPin: ${aPinState}, bPin: ${bPinState}`);
+  };
+  aPin.on("data", handler);
+
+  bPin.on("data", handler);
 
   pressButton.on("up", () => {
     onPress();
