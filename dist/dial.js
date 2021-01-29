@@ -8,10 +8,11 @@ const chalk_1 = __importDefault(require("chalk"));
 const johnny_five_1 = __importDefault(require("johnny-five"));
 const board_1 = require("./board");
 const ringlog_1 = require("./ringlog");
+const delay = parseInt(process.env.DELAY || "2", 10);
 function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
     // const wave = [null, null];
     aPin.on("change", () => {
-        console.log(bPin.value);
+        setTimeout(() => console.log(bPin.value), delay);
     });
     // bPin.on("change", () => {
     //   wave[0] = bPin.value;

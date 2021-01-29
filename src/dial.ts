@@ -3,6 +3,8 @@ import five from "johnny-five";
 import { board } from "./board";
 import { Log } from "./ringlog";
 
+const delay = parseInt(process.env.DELAY || "2", 10);
+
 function rotaryEncoder({
   aPin,
   bPin,
@@ -21,7 +23,7 @@ function rotaryEncoder({
   // const wave = [null, null];
 
   aPin.on("change", () => {
-    console.log(bPin.value);
+    setTimeout(() => console.log(bPin.value), delay);
   });
   // bPin.on("change", () => {
   //   wave[0] = bPin.value;
