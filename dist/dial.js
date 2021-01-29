@@ -9,19 +9,20 @@ const johnny_five_1 = __importDefault(require("johnny-five"));
 const board_1 = require("./board");
 const ringlog_1 = require("./ringlog");
 function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
-    let state = "";
-    const handler = () => {
-        const bPinState = bPin.value;
-        console.log(`bPin: ${bPinState}`);
-    };
+    // const wave = [null, null];
     aPin.on("change", () => {
-        const bPinState = bPin.value;
-        console.log(`bPin: ${bPinState}`);
+        console.log(bPin.value);
     });
-    bPin.on("change", () => {
-        const aPinState = aPin.value;
-        console.log(`aPin: ${aPinState}`);
-    });
+    // bPin.on("change", () => {
+    //   wave[0] = bPin.value;
+    //   handleWave()
+    // });
+    // function handleWave(){
+    //   if (wave.includes(null)) {
+    //     return
+    //   }
+    //   console.log(wave)
+    // }
     pressButton.on("up", () => {
         onPress();
     });
