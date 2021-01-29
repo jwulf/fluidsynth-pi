@@ -14,8 +14,14 @@ function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
         const bPinState = bPin.value;
         console.log(`bPin: ${bPinState}`);
     };
-    aPin.on("change", handler);
-    // bPin.on("change", handler);
+    aPin.on("change", () => {
+        const bPinState = bPin.value;
+        console.log(`bPin: ${bPinState}`);
+    });
+    bPin.on("change", () => {
+        const aPinState = aPin.value;
+        console.log(`bPin: ${aPinState}`);
+    });
     pressButton.on("up", () => {
         onPress();
     });
