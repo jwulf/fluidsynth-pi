@@ -50,7 +50,11 @@ const lcd =
     : null;
 const _ =
   (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
-    ? new Dial()
+    ? new Dial({
+        onDown: () => {},
+        onPress: () => {},
+        onUp: () => {},
+      })
     : null;
 log(`LCD ${lcd ? "enabled" : "disabled"}`);
 const lcdPrint = (msg: string, line: number) => {
