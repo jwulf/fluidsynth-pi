@@ -30,7 +30,6 @@ function rotaryEncoder({
       state = "";
     }
     state += `${aPinState}${bPinState}`;
-    console.log(`${aPinState}${bPinState}`);
   };
 
   aPin.on("change", handler);
