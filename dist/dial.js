@@ -15,8 +15,8 @@ function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
         const bPinState = bPin.value;
         const aPinState = aPin.value;
         if (state.length === 4) {
-            console.log(`previousState: ${previousState}`);
-            console.log(`state: ${state}`);
+            console.log(`previousState: ${previousState}`, parseInt(previousState, 2));
+            console.log(`state: ${state}`, parseInt(state, 2));
             previousState = state;
             state = "";
         }
