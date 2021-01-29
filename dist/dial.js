@@ -24,8 +24,16 @@ class Dial {
     constructor() {
         this.log = ringlog_1.Log(chalk_1.default.greenBright);
         board_1.board().ready.then(() => {
-            const aPin = new johnny_five_1.default.Pin("GPIO4");
-            const bPin = new johnny_five_1.default.Pin("GPIO5");
+            const aPin = new johnny_five_1.default.Pin({
+                pin: "GPIO4",
+                type: "digital",
+                mode: 0,
+            });
+            const bPin = new johnny_five_1.default.Pin({
+                pin: "GPIO5",
+                type: "digital",
+                mode: 0,
+            });
             this.pressButton = new johnny_five_1.default.Button({ pin: "GPIO6", isPullup: true });
             rotaryEncoder({
                 aPin,

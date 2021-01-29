@@ -42,8 +42,16 @@ export class Dial {
   constructor() {
     this.log = Log(chalk.greenBright);
     board().ready.then(() => {
-      const aPin = new five.Pin("GPIO4");
-      const bPin = new five.Pin("GPIO5");
+      const aPin = new five.Pin({
+        pin: "GPIO4",
+        type: "digital",
+        mode: 0,
+      } as any);
+      const bPin = new five.Pin({
+        pin: "GPIO5",
+        type: "digital",
+        mode: 0,
+      } as any);
       this.pressButton = new five.Button({ pin: "GPIO6", isPullup: true });
       rotaryEncoder({
         aPin,
