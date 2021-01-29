@@ -34,6 +34,8 @@ class Dial {
                 type: "digital",
                 mode: 0,
             });
+            johnny_five_1.default.io.digitalWrite(aPin, johnny_five_1.default.io.HIGH);
+            johnny_five_1.default.io.digitalWrite(bPin, johnny_five_1.default.io.HIGH);
             this.pressButton = new johnny_five_1.default.Button({ pin: "GPIO6", isPullup: true });
             rotaryEncoder({
                 aPin,
