@@ -3,8 +3,6 @@ import five from "johnny-five";
 import { board } from "./board";
 import { Log } from "./ringlog";
 
-const delay = parseInt(process.env.DELAY || "2", 10);
-
 function rotaryEncoder({
   aPin,
   bPin,
@@ -20,8 +18,8 @@ function rotaryEncoder({
   onDown: () => void;
   onPress: () => void;
 }) {
-  aPin.on("change", () => {
-    console.log(bPin.value === 1 ? "up" : "down");
+  bPin.on("change", () => {
+    console.log(aPin.value === 1 ? "up" : "down");
   });
 
   pressButton.on("up", () => {
