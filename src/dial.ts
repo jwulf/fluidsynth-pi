@@ -53,8 +53,8 @@ export class Dial {
         type: "digital",
         mode: 0,
       } as any);
-      (aPin as any).io.digitalWrite(aPin, (aPin as any).io.HIGH);
-      (bPin as any).io.digitalWrite(bPin, (bPin as any).io.HIGH);
+      (aPin as any).io.digitalWrite("GPIO4", (aPin as any).io.HIGH);
+      (bPin as any).io.digitalWrite("GPIO5", (bPin as any).io.HIGH);
 
       this.pressButton = new five.Button({ pin: "GPIO6", isPullup: true });
       rotaryEncoder({
