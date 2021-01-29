@@ -10,20 +10,9 @@ const board_1 = require("./board");
 const ringlog_1 = require("./ringlog");
 const delay = parseInt(process.env.DELAY || "2", 10);
 function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
-    // const wave = [null, null];
     aPin.on("change", () => {
-        setTimeout(() => console.log(bPin.value), delay);
+        console.log(bPin.value === 1 ? "up" : "down");
     });
-    // bPin.on("change", () => {
-    //   wave[0] = bPin.value;
-    //   handleWave()
-    // });
-    // function handleWave(){
-    //   if (wave.includes(null)) {
-    //     return
-    //   }
-    //   console.log(wave)
-    // }
     pressButton.on("up", () => {
         onPress();
     });

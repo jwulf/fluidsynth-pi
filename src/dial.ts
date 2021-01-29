@@ -20,23 +20,9 @@ function rotaryEncoder({
   onDown: () => void;
   onPress: () => void;
 }) {
-  // const wave = [null, null];
-
   aPin.on("change", () => {
-    setTimeout(() => console.log(bPin.value), delay);
+    console.log(bPin.value === 1 ? "up" : "down");
   });
-  // bPin.on("change", () => {
-  //   wave[0] = bPin.value;
-  //   handleWave()
-  // });
-
-  // function handleWave(){
-  //   if (wave.includes(null)) {
-  //     return
-  //   }
-  //   console.log(wave)
-
-  // }
 
   pressButton.on("up", () => {
     onPress();
