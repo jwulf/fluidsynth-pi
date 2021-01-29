@@ -24,8 +24,11 @@ function rotaryEncoder({
     const bPinState = bPin.value;
     const aPinState = aPin.value;
     if (state.length === 4) {
-      console.log(`state: ${state}`);
-      console.log(`previousState: ${previousState}`);
+      console.log(
+        `previousState: ${previousState}`,
+        parseInt(previousState, 2)
+      );
+      console.log(`state: ${state}`, parseInt(state, 2));
       previousState = state;
       state = "";
     }
