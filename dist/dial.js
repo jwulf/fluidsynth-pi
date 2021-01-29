@@ -9,7 +9,7 @@ const johnny_five_1 = __importDefault(require("johnny-five"));
 const board_1 = require("./board");
 const ringlog_1 = require("./ringlog");
 function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
-    bPin.on("change", () => {
+    bPin.on("low", () => {
         console.log(aPin.value === 1 ? "up" : "down");
     });
     pressButton.on("up", () => {
