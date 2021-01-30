@@ -46,14 +46,24 @@ const aconnectArgs = process.env.ACONNECT_ARGS || "16:0 128:0";
 let soundfonts;
 let currentSoundfont;
 let loadedFontID = 1;
+let currentSoundfontIndex;
 const lcd = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new lcd_1.LCD()
     : null;
 const _ = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new dial_1.Dial({
-        onDown: () => { },
+        onDown: () => {
+            currentSoundfontIndex--;
+            if (currentSoundfontIndex < 0) {
+                currentSoundfontIndex = soundfonts.length - 1;
+            }
+            loadSoundFont(currentSoundfontIndex);
+        },
         onPress: () => { },
-        onUp: () => { },
+        onUp: () => {
+            currentSoundfontIndex = currentSoundfontIndex++ % soundfonts.length;
+            loadSoundFont(currentSoundfontIndex);
+        },
     })
     : null;
 log(`LCD ${lcd ? "enabled" : "disabled"}`);
@@ -87,8 +97,8 @@ function initialiseFluidsynth() {
         lcdPrint("", 1);
         loadedFontID = 1;
         soundfonts = initialiseSoundFonts();
-        const index = soundfonts.indexOf(currentSoundfont);
-        const font = soundfonts[index];
+        currentSoundfontIndex = soundfonts.indexOf(currentSoundfont);
+        const font = soundfonts[currentSoundfontIndex];
         fluidsynth.stdin.write(`load soundfonts/${font}\n`);
         fluidsynth.stdin.write("fonts\n");
         lcdPrint(font, 0);
@@ -106,7 +116,17 @@ io.on("connection", (client) => {
         fonts: soundfonts,
         currentSoundfont,
     }));
-    client.on("changeinst", (index) => __awaiter(void 0, void 0, void 0, function* () {
+    client.on("changeinst", loadSoundFont);
+    client.on("restart_fluidsynth", restartFluidsynth);
+    client.on("shutdown", () => {
+        log("Shutting down computer...");
+        lcdPrint("Shutdown...", 1);
+        lcd === null || lcd === void 0 ? void 0 : lcd.lcd.backlight().off();
+        child_process_1.default.execSync("shutdown -h now");
+    });
+});
+function loadSoundFont(index) {
+    return __awaiter(this, void 0, void 0, function* () {
         const font = soundfonts[index];
         log(`Changing to ${font}...`);
         if (loadedFontID === 22) {
@@ -120,15 +140,8 @@ io.on("connection", (client) => {
             fluidsynth.stdin.write(`fonts\n`);
             lcdPrint(font, 0);
         });
-    }));
-    client.on("restart_fluidsynth", restartFluidsynth);
-    client.on("shutdown", () => {
-        log("Shutting down computer...");
-        lcdPrint("Shutdown...", 1);
-        lcd === null || lcd === void 0 ? void 0 : lcd.lcd.backlight().off();
-        child_process_1.default.execSync("shutdown -h now");
     });
-});
+}
 function restartFluidsynth() {
     return __awaiter(this, void 0, void 0, function* () {
         log("Killing fluidsynth...");
