@@ -22,7 +22,7 @@ function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
         if (!emitTimer) {
             const current = value;
             emitTimer = setTimeout(() => {
-                console.log(current > value ? "up" : "down", `(${value})`);
+                console.log(current > value ? "up" : "down", `(${current})`);
                 emitTimer = undefined;
             }, delay);
         }
