@@ -6,15 +6,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Dial = void 0;
 const johnny_five_1 = __importDefault(require("johnny-five"));
 const board_1 = require("./board");
+// Make this thing debounced.
+// Detect direction, and emit every n seconds.
+// When emit, cancel any pending direction detection
 function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
     // https://gist.github.com/rwaldron/5db750527f257636c5d3b2c492737c99
     let value = 0;
     let rotation = 0;
     let last = 0;
     let lValue = 0;
+    let emitTimer;
     const handler = function () {
         // this.emit("data", this.value);
-        console.log("data", value);
+        if (!emitTimer) {
+            const current = value;
+            emitTimer = setTimeout(() => {
+                console.log(current > value ? "up" : "down");
+                emitTimer = undefined;
+            }, 2);
+        }
+        // console.log("data", value);
         var MSB = bPin.value;
         var LSB = aPin.value;
         var pos, turn;
@@ -36,7 +47,7 @@ function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
         last = pos;
         if (lValue !== value) {
             // this.emit("change", value);
-            console.log("change", value);
+            // console.log("change", value);
         }
         if (value % 80 === 0 && value / 80 !== rotation) {
             rotation = value / 80;

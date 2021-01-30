@@ -1,6 +1,9 @@
 import five from "johnny-five";
 import { board } from "./board";
 
+// Make this thing debounced.
+// Detect direction, and emit every n seconds.
+// When emit, cancel any pending direction detection
 function rotaryEncoder({
   aPin,
   bPin,
@@ -21,10 +24,18 @@ function rotaryEncoder({
   let rotation = 0;
   let last = 0;
   let lValue = 0;
+  let emitTimer: NodeJS.Timeout | undefined;
 
   const handler = function () {
     // this.emit("data", this.value);
-    console.log("data", value);
+    if (!emitTimer) {
+      const current = value;
+      emitTimer = setTimeout(() => {
+        console.log(current > value ? "up" : "down");
+        emitTimer = undefined;
+      }, 2);
+    }
+    // console.log("data", value);
 
     var MSB = bPin.value;
     var LSB = aPin.value;
@@ -50,7 +61,7 @@ function rotaryEncoder({
 
     if (lValue !== value) {
       // this.emit("change", value);
-      console.log("change", value);
+      // console.log("change", value);
     }
 
     if (value % 80 === 0 && value / 80 !== rotation) {
