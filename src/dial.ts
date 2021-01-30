@@ -31,7 +31,7 @@ function rotaryEncoder({
     if (!emitTimer) {
       const current = value;
       emitTimer = setTimeout(() => {
-        console.log(current > value ? "up" : "down");
+        console.log(current > value ? "up" : "down", `(${value})`);
         emitTimer = undefined;
       }, delay);
     }
