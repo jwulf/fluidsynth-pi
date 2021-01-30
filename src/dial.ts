@@ -16,11 +16,13 @@ function rotaryEncoder({
   onDown: () => void;
   onPress: () => void;
 }) {
-  bPin.on("high", () => {
-    console.log("BPin trigger: ", aPin.value);
+  bPin.on("change", () => {
+    console.log("[BPin trigger]: ", aPin.value, bPin.value);
     // (aPin.value ? onDown() : onUp())
   });
-  aPin.on("high", () => console.log("APin trigger: ", bPin.value));
+  aPin.on("change", () =>
+    console.log("[APin trigger]: ", aPin.value, bPin.value)
+  );
   pressButton.on("up", () => onPress());
 }
 

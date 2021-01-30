@@ -7,11 +7,11 @@ exports.Dial = void 0;
 const johnny_five_1 = __importDefault(require("johnny-five"));
 const board_1 = require("./board");
 function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
-    bPin.on("high", () => {
-        console.log("BPin trigger: ", aPin.value);
+    bPin.on("change", () => {
+        console.log("[BPin trigger]: ", aPin.value, bPin.value);
         // (aPin.value ? onDown() : onUp())
     });
-    aPin.on("high", () => console.log("APin trigger: ", bPin.value));
+    aPin.on("change", () => console.log("[APin trigger]: ", aPin.value, bPin.value));
     pressButton.on("up", () => onPress());
 }
 class Dial {
