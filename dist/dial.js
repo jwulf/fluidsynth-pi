@@ -7,14 +7,16 @@ exports.Dial = void 0;
 const johnny_five_1 = __importDefault(require("johnny-five"));
 const board_1 = require("./board");
 function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
+    // https://gist.github.com/rwaldron/5db750527f257636c5d3b2c492737c99
     let value = 0;
     let rotation = 0;
     let last = 0;
     let lValue = 0;
     const handler = function () {
         // this.emit("data", this.value);
-        var MSB = aPin.value;
-        var LSB = bPin.value;
+        console.log("data", value);
+        var MSB = bPin.value;
+        var LSB = aPin.value;
         var pos, turn;
         if (LSB === 1) {
             pos = MSB === 1 ? 0 : 1;

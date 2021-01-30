@@ -24,9 +24,10 @@ function rotaryEncoder({
 
   const handler = function () {
     // this.emit("data", this.value);
+    console.log("data", value);
 
-    var MSB = aPin.value;
-    var LSB = bPin.value;
+    var MSB = bPin.value;
+    var LSB = aPin.value;
     var pos, turn;
 
     if (LSB === 1) {
