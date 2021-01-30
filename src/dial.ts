@@ -1,6 +1,6 @@
 import five from "johnny-five";
 import { board } from "./board";
-
+const delay = parseInt(process.env.DELAY || "500", 10);
 // Make this thing debounced.
 // Detect direction, and emit every n seconds.
 // When emit, cancel any pending direction detection
@@ -33,7 +33,7 @@ function rotaryEncoder({
       emitTimer = setTimeout(() => {
         console.log(current > value ? "up" : "down");
         emitTimer = undefined;
-      }, 2000);
+      }, delay);
     }
     // console.log("data", value);
 
