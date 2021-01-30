@@ -16,13 +16,60 @@ function rotaryEncoder({
   onDown: () => void;
   onPress: () => void;
 }) {
-  bPin.on("change", () => {
-    console.log("[BPin trigger]: ", aPin.value, bPin.value);
-    // (aPin.value ? onDown() : onUp())
-  });
-  aPin.on("change", () =>
-    console.log("[APin trigger]: ", aPin.value, bPin.value)
-  );
+  // https://gist.github.com/rwaldron/5db750527f257636c5d3b2c492737c99
+  let value = 0;
+  let rotation = 0;
+  let last = 0;
+  let lValue = 0;
+
+  const handler = function () {
+    // this.emit("data", this.value);
+
+    var MSB = aPin.value;
+    var LSB = bPin.value;
+    var pos, turn;
+
+    if (LSB === 1) {
+      pos = MSB === 1 ? 0 : 1;
+    } else {
+      pos = MSB === 0 ? 2 : 3;
+    }
+
+    turn = pos - last;
+
+    if (Math.abs(turn) !== 2) {
+      if (turn === -1 || turn === 3) {
+        value++;
+      } else if (turn === 1 || turn === -3) {
+        value--;
+      }
+    }
+
+    last = pos;
+
+    if (lValue !== value) {
+      // this.emit("change", value);
+      console.log("change", value);
+    }
+
+    if (value % 80 === 0 && value / 80 !== rotation) {
+      rotation = value / 80;
+      console.log("rotation");
+    }
+
+    lValue = value;
+  };
+
+  bPin.on("change", handler);
+  // () => {
+
+  // console.log("[BPin trigger]: ", aPin.value, bPin.value);
+  // (aPin.value ? onDown() : onUp())
+  // });
+  aPin.on("change", handler);
+  // () =>
+  // console.log("[APin trigger]: ", aPin.value, bPin.value)
+  // );
   pressButton.on("up", () => onPress());
 }
 
