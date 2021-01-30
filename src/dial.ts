@@ -1,9 +1,7 @@
 import five from "johnny-five";
 import { board } from "./board";
-const delay = parseInt(process.env.DELAY || "500", 10);
-// Make this thing debounced.
-// Detect direction, and emit every n seconds.
-// When emit, cancel any pending direction detection
+const delay = parseInt(process.env.ROTARY_DELAY || "500", 10);
+
 function rotaryEncoder({
   aPin,
   bPin,
@@ -32,15 +30,16 @@ function rotaryEncoder({
       const current = value;
       emitTimer = setTimeout(() => {
         if (current != value) {
-          console.log(
-            current > value ? "up" : "down",
-            `(was: ${current}, now: ${value})`
-          );
+          const isUp = current > value;
+          if (isUp) {
+            onUp();
+          } else {
+            onDown();
+          }
         }
         emitTimer = undefined;
       }, delay);
     }
-    // console.log("data", value);
 
     var MSB = aPin.value;
     var LSB = bPin.value;
@@ -78,15 +77,9 @@ function rotaryEncoder({
   };
 
   bPin.on("change", handler);
-  // () => {
 
-  // console.log("[BPin trigger]: ", aPin.value, bPin.value);
-  // (aPin.value ? onDown() : onUp())
-  // });
   aPin.on("change", handler);
-  // () =>
-  // console.log("[APin trigger]: ", aPin.value, bPin.value)
-  // );
+
   pressButton.on("up", () => onPress());
 }
 
@@ -125,12 +118,15 @@ export class Dial {
         pressButton,
         onUp: () => {
           console.log("up");
+          onUp();
         },
         onDown: () => {
           console.log("down");
+          onDown();
         },
         onPress: () => {
           console.log("press");
+          onPress();
         },
       });
     });

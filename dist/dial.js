@@ -6,10 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Dial = void 0;
 const johnny_five_1 = __importDefault(require("johnny-five"));
 const board_1 = require("./board");
-const delay = parseInt(process.env.DELAY || "500", 10);
-// Make this thing debounced.
-// Detect direction, and emit every n seconds.
-// When emit, cancel any pending direction detection
+const delay = parseInt(process.env.ROTARY_DELAY || "500", 10);
 function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
     // https://gist.github.com/rwaldron/5db750527f257636c5d3b2c492737c99
     let value = 0;
@@ -23,12 +20,17 @@ function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
             const current = value;
             emitTimer = setTimeout(() => {
                 if (current != value) {
-                    console.log(current > value ? "up" : "down", `(was: ${current}, now: ${value})`);
+                    const isUp = current > value;
+                    if (isUp) {
+                        onUp();
+                    }
+                    else {
+                        onDown();
+                    }
                 }
                 emitTimer = undefined;
             }, delay);
         }
-        // console.log("data", value);
         var MSB = aPin.value;
         var LSB = bPin.value;
         var pos, turn;
@@ -59,14 +61,7 @@ function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
         lValue = value;
     };
     bPin.on("change", handler);
-    // () => {
-    // console.log("[BPin trigger]: ", aPin.value, bPin.value);
-    // (aPin.value ? onDown() : onUp())
-    // });
     aPin.on("change", handler);
-    // () =>
-    // console.log("[APin trigger]: ", aPin.value, bPin.value)
-    // );
     pressButton.on("up", () => onPress());
 }
 class Dial {
@@ -91,12 +86,15 @@ class Dial {
                 pressButton,
                 onUp: () => {
                     console.log("up");
+                    onUp();
                 },
                 onDown: () => {
                     console.log("down");
+                    onDown();
                 },
                 onPress: () => {
                     console.log("press");
+                    onPress();
                 },
             });
         });
