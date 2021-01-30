@@ -23,11 +23,11 @@ function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
             emitTimer = setTimeout(() => {
                 console.log(current > value ? "up" : "down");
                 emitTimer = undefined;
-            }, 2);
+            }, 2000);
         }
         // console.log("data", value);
-        var MSB = bPin.value;
-        var LSB = aPin.value;
+        var MSB = aPin.value;
+        var LSB = bPin.value;
         var pos, turn;
         if (LSB === 1) {
             pos = MSB === 1 ? 0 : 1;
