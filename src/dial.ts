@@ -31,10 +31,12 @@ function rotaryEncoder({
     if (!emitTimer) {
       const current = value;
       emitTimer = setTimeout(() => {
-        console.log(
-          current > value ? "up" : "down",
-          `(was: ${current}, now: ${value})`
-        );
+        if (current != value) {
+          console.log(
+            current > value ? "up" : "down",
+            `(was: ${current}, now: ${value})`
+          );
+        }
         emitTimer = undefined;
       }, delay);
     }
