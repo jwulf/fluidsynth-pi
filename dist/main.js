@@ -61,7 +61,8 @@ const _ = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
         },
         onPress: () => { },
         onUp: () => {
-            currentSoundfontIndex = currentSoundfontIndex++ % soundfonts.length;
+            currentSoundfontIndex++;
+            currentSoundfontIndex = currentSoundfontIndex % soundfonts.length;
             loadSoundFont(currentSoundfontIndex);
         },
     })
