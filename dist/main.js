@@ -50,6 +50,10 @@ let currentSoundfontIndex;
 const lcd = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new lcd_1.LCD()
     : null;
+let shutdownMode = false;
+/**
+ * Rotary Dial
+ */
 const _ = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new dial_1.Dial({
         onDown: () => {
@@ -59,7 +63,18 @@ const _ = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
             }
             loadSoundFont(currentSoundfontIndex);
         },
-        onPress: () => { },
+        onPress: () => {
+            if (shutdownMode) {
+                return shutdown();
+            }
+            shutdownMode = true;
+            const previousLCD = (lcd === null || lcd === void 0 ? void 0 : lcd.content) || [""];
+            lcd === null || lcd === void 0 ? void 0 : lcd.print("Press to shutdown...", 0);
+            setTimeout(() => {
+                shutdownMode = false;
+                lcd === null || lcd === void 0 ? void 0 : lcd.print(previousLCD === null || previousLCD === void 0 ? void 0 : previousLCD[0], 0);
+            }, 3000);
+        },
         onUp: () => {
             currentSoundfontIndex++;
             currentSoundfontIndex = currentSoundfontIndex % soundfonts.length;
@@ -119,12 +134,7 @@ io.on("connection", (client) => {
     }));
     client.on("changeinst", loadSoundFont);
     client.on("restart_fluidsynth", restartFluidsynth);
-    client.on("shutdown", () => {
-        log("Shutting down computer...");
-        lcdPrint("Shutdown...", 1);
-        lcd === null || lcd === void 0 ? void 0 : lcd.lcd.backlight().off();
-        child_process_1.default.execSync("shutdown -h now");
-    });
+    client.on("shutdown", shutdown);
 });
 function loadSoundFont(index) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -153,4 +163,10 @@ function restartFluidsynth() {
             fluidsynth = initialiseFluidsynth();
         });
     });
+}
+function shutdown() {
+    log("Shutting down computer...");
+    lcdPrint("Shutdown...", 1);
+    lcd === null || lcd === void 0 ? void 0 : lcd.lcd.backlight().off();
+    child_process_1.default.execSync("shutdown -h now");
 }

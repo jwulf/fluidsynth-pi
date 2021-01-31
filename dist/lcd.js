@@ -10,6 +10,7 @@ const board_1 = require("./board");
 const ringlog_1 = require("./ringlog");
 class LCD {
     constructor() {
+        this.content = [undefined, undefined];
         this.log = ringlog_1.Log(chalk_1.default.greenBright);
         this.board = board_1.board().ready.then((board) => {
             this.lcd = new johnny_five_1.default.LCD({
@@ -42,6 +43,7 @@ class LCD {
     print(message = "", lineNum = 0) {
         if (this.lcd) {
             this.lcd.cursor(lineNum, 0).print(message);
+            this.content[lineNum] = message;
         }
     }
     printAt(message = "", lineNum = 0, colNum = 0) {

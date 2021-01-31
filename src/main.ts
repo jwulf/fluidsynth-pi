@@ -49,6 +49,11 @@ const lcd =
   (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new LCD()
     : null;
+let shutdownMode = false;
+
+/**
+ * Rotary Dial
+ */
 const _ =
   (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new Dial({
@@ -59,7 +64,18 @@ const _ =
           }
           loadSoundFont(currentSoundfontIndex);
         },
-        onPress: () => {},
+        onPress: () => {
+          if (shutdownMode) {
+            return shutdown();
+          }
+          shutdownMode = true;
+          const previousLCD = lcd?.content || [""];
+          lcd?.print("Press to shutdown...", 0);
+          setTimeout(() => {
+            shutdownMode = false;
+            lcd?.print(previousLCD?.[0], 0);
+          }, 3000);
+        },
         onUp: () => {
           currentSoundfontIndex++;
           currentSoundfontIndex = currentSoundfontIndex % soundfonts.length;
@@ -128,12 +144,7 @@ io.on("connection", (client) => {
   );
   client.on("changeinst", loadSoundFont);
   client.on("restart_fluidsynth", restartFluidsynth);
-  client.on("shutdown", () => {
-    log("Shutting down computer...");
-    lcdPrint("Shutdown...", 1);
-    lcd?.lcd.backlight().off();
-    cp.execSync("shutdown -h now");
-  });
+  client.on("shutdown", shutdown);
 });
 
 async function loadSoundFont(index: number) {
@@ -161,4 +172,11 @@ async function restartFluidsynth() {
     f.kill();
     fluidsynth = initialiseFluidsynth();
   });
+}
+
+function shutdown() {
+  log("Shutting down computer...");
+  lcdPrint("Shutdown...", 1);
+  lcd?.lcd.backlight().off();
+  cp.execSync("shutdown -h now");
 }

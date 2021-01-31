@@ -7,6 +7,7 @@ export class LCD {
   lcd!: five.LCD;
   log: (msg: string) => void;
   board: any;
+  public content: (string | undefined)[] = [undefined, undefined];
   constructor() {
     this.log = Log(chalk.greenBright);
     this.board = board().ready.then((board) => {
@@ -41,6 +42,7 @@ export class LCD {
   print(message = "", lineNum = 0) {
     if (this.lcd) {
       this.lcd.cursor(lineNum, 0).print(message);
+      this.content[lineNum] = message;
     }
   }
 
