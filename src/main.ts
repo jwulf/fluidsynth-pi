@@ -49,11 +49,11 @@ const lcd =
   (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new LCD()
     : null;
-let shutdownMode = false;
 
 /**
  * Rotary Dial
  */
+let shutdownMode = false;
 const _ =
   (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new Dial({
@@ -65,6 +65,7 @@ const _ =
           loadSoundFont(currentSoundfontIndex);
         },
         onPress: () => {
+          console.log("Press handler");
           if (shutdownMode) {
             return shutdown();
           }

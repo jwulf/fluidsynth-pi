@@ -50,10 +50,10 @@ let currentSoundfontIndex;
 const lcd = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new lcd_1.LCD()
     : null;
-let shutdownMode = false;
 /**
  * Rotary Dial
  */
+let shutdownMode = false;
 const _ = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new dial_1.Dial({
         onDown: () => {
@@ -64,6 +64,7 @@ const _ = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
             loadSoundFont(currentSoundfontIndex);
         },
         onPress: () => {
+            console.log("Press handler");
             if (shutdownMode) {
                 return shutdown();
             }
