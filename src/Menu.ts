@@ -3,12 +3,12 @@ import cp from "child_process";
 import { Log } from "./ringlog";
 import chalk from "chalk";
 
-type MenuMode = "FONTS" | "SYSTEM";
+type MenuMode = "UNSTARTED" | "FONTS" | "SYSTEM";
 
 const log = Log(chalk.yellowBright);
 
 export class Menu {
-  private mode: MenuMode = "FONTS";
+  private mode: MenuMode = "UNSTARTED";
   public systemMenu: SystemMenu;
   constructor(
     private fluidsynth: FluidSynth,
@@ -23,6 +23,18 @@ export class Menu {
     }
     if (this.mode === "SYSTEM") {
       this.systemMenu.handlePress(this.setMode);
+    }
+    if (this.mode === "UNSTARTED") {
+      this.fluidsynth
+        .restart()
+        .then(() => this.setFontMode())
+        .catch(() => {
+          this.lcdPrint("Failed to start", 0);
+          this.lcdPrint("", 1);
+          setTimeout(() => {
+            this.setMode("UNSTARTED");
+          }, 2000);
+        });
     }
   };
 
@@ -59,7 +71,7 @@ export class Menu {
     this.systemMenu.show();
   }
 
-  private setMode(mode: MenuMode) {
+  public setMode(mode: MenuMode) {
     switch (mode) {
       case "FONTS": {
         this.setFontMode();
@@ -67,6 +79,11 @@ export class Menu {
       }
       case "SYSTEM": {
         this.setSystemMode();
+        break;
+      }
+      case "UNSTARTED": {
+        this.lcdPrint("Connect keyboard", 0);
+        this.lcdPrint("& push dial...", 1);
         break;
       }
     }

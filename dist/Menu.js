@@ -12,13 +12,25 @@ class Menu {
     constructor(fluidsynth, lcdPrint) {
         this.fluidsynth = fluidsynth;
         this.lcdPrint = lcdPrint;
-        this.mode = "FONTS";
+        this.mode = "UNSTARTED";
         this.onPress = () => {
             if (this.mode === "FONTS") {
                 this.setSystemMode();
             }
             if (this.mode === "SYSTEM") {
                 this.systemMenu.handlePress(this.setMode);
+            }
+            if (this.mode === "UNSTARTED") {
+                this.fluidsynth
+                    .restart()
+                    .then(() => this.setFontMode())
+                    .catch(() => {
+                    this.lcdPrint("Failed to start", 0);
+                    this.lcdPrint("", 1);
+                    setTimeout(() => {
+                        this.setMode("UNSTARTED");
+                    }, 2000);
+                });
             }
         };
         this.systemMenu = new SystemMenu(this.lcdPrint, fluidsynth);
@@ -60,6 +72,11 @@ class Menu {
             }
             case "SYSTEM": {
                 this.setSystemMode();
+                break;
+            }
+            case "UNSTARTED": {
+                this.lcdPrint("Connect keyboard", 0);
+                this.lcdPrint("& push dial...", 1);
                 break;
             }
         }

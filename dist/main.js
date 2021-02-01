@@ -55,6 +55,7 @@ const lcdPrint = (msg, line) => {
 lcdPrint("Starting...", 0);
 const fluidsynth = new fluidsynth_1.FluidSynth(lcdPrint);
 const menu = new Menu_1.Menu(fluidsynth, lcdPrint);
+fluidsynth.ready.catch(() => menu.setMode("UNSTARTED"));
 /**
  * Rotary Dial
  */
