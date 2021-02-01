@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-const child_process_1 = __importDefault(require("child_process"));
 const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const fluidsynth_1 = require("./fluidsynth");
@@ -30,6 +29,7 @@ const ringlog_1 = require("./ringlog");
 // import { uploadHandler } from "./upload";
 const lcd_1 = require("./lcd");
 const dial_1 = require("./dial");
+const Menu_1 = require("./Menu");
 const log = ringlog_1.Log(chalk_1.default.yellowBright);
 app.use(express_fileupload_1.default({
     createParentPath: true,
@@ -54,31 +54,15 @@ const lcdPrint = (msg, line) => {
 };
 lcdPrint("Starting...", 0);
 const fluidsynth = new fluidsynth_1.FluidSynth(lcdPrint);
+const menu = new Menu_1.Menu(fluidsynth, lcdPrint);
 /**
  * Rotary Dial
  */
-let shutdownMode = false;
-const _ = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
+const __ = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new dial_1.Dial({
-        onDown: () => fluidsynth
-            .loadPreviousFont()
-            .then(() => lcdPrint(fluidsynth.currentSoundFont, 0)),
-        onPress: () => {
-            console.log("Press handler");
-            if (shutdownMode) {
-                return shutdown();
-            }
-            shutdownMode = true;
-            const previousLCD = (lcd === null || lcd === void 0 ? void 0 : lcd.content) || [""];
-            lcd === null || lcd === void 0 ? void 0 : lcd.print("Press to shutdown...", 0);
-            setTimeout(() => {
-                shutdownMode = false;
-                lcd === null || lcd === void 0 ? void 0 : lcd.print(previousLCD === null || previousLCD === void 0 ? void 0 : previousLCD[0], 0);
-            }, 3000);
-        },
-        onUp: () => fluidsynth
-            .loadNextFont()
-            .then(() => lcdPrint(fluidsynth.currentSoundFont, 0)),
+        onDown: () => menu.onDown(),
+        onPress: () => menu.onPress(),
+        onUp: () => menu.onUp(),
     })
     : null;
 server.listen(3000);
@@ -94,13 +78,14 @@ io.on("connection", (client) => {
     }));
     client.on("changeinst", loadSoundFont);
     client.on("restart_fluidsynth", restartFluidsynth);
-    client.on("shutdown", shutdown);
+    client.on("shutdown", () => menu.systemMenu.doShutdown());
 });
 function loadSoundFont(index) {
     return __awaiter(this, void 0, void 0, function* () {
         fluidsynth.ready.then(() => {
             const font = fluidsynth.getFontList()[index];
             fluidsynth.loadFont(font);
+            menu.setFontMode();
         });
     });
 }
@@ -108,10 +93,4 @@ function restartFluidsynth() {
     return __awaiter(this, void 0, void 0, function* () {
         fluidsynth.restart();
     });
-}
-function shutdown() {
-    log("Shutting down computer...");
-    lcdPrint("Shutdown...", 1);
-    lcd === null || lcd === void 0 ? void 0 : lcd.lcd.backlight().off();
-    child_process_1.default.execSync("shutdown -h now");
 }

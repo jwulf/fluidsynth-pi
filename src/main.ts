@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 dotenv.config();
-import cp from "child_process";
 import express from "express";
 import http from "http";
 import { FluidSynth } from "./fluidsynth";
@@ -18,6 +17,7 @@ import { Log, ringlog } from "./ringlog";
 // import { uploadHandler } from "./upload";
 import { LCD } from "./lcd";
 import { Dial } from "./dial";
+import { Menu } from "./Menu";
 
 const log = Log(chalk.yellowBright);
 
@@ -51,34 +51,16 @@ const lcdPrint = (msg: string, line: number) => {
 lcdPrint("Starting...", 0);
 
 const fluidsynth = new FluidSynth(lcdPrint);
+const menu = new Menu(fluidsynth, lcdPrint);
 /**
  * Rotary Dial
  */
-let shutdownMode = false;
-const _ =
+const __ =
   (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new Dial({
-        onDown: () =>
-          fluidsynth
-            .loadPreviousFont()
-            .then(() => lcdPrint(fluidsynth.currentSoundFont, 0)),
-        onPress: () => {
-          console.log("Press handler");
-          if (shutdownMode) {
-            return shutdown();
-          }
-          shutdownMode = true;
-          const previousLCD = lcd?.content || [""];
-          lcd?.print("Press to shutdown...", 0);
-          setTimeout(() => {
-            shutdownMode = false;
-            lcd?.print(previousLCD?.[0], 0);
-          }, 3000);
-        },
-        onUp: () =>
-          fluidsynth
-            .loadNextFont()
-            .then(() => lcdPrint(fluidsynth.currentSoundFont, 0)),
+        onDown: () => menu.onDown(),
+        onPress: () => menu.onPress(),
+        onUp: () => menu.onUp(),
       })
     : null;
 
@@ -101,23 +83,17 @@ io.on("connection", (client) => {
   );
   client.on("changeinst", loadSoundFont);
   client.on("restart_fluidsynth", restartFluidsynth);
-  client.on("shutdown", shutdown);
+  client.on("shutdown", () => menu.systemMenu.doShutdown());
 });
 
 async function loadSoundFont(index: number) {
   fluidsynth.ready.then(() => {
     const font = fluidsynth.getFontList()[index];
     fluidsynth.loadFont(font);
+    menu.setFontMode();
   });
 }
 
 async function restartFluidsynth() {
   fluidsynth.restart();
-}
-
-function shutdown() {
-  log("Shutting down computer...");
-  lcdPrint("Shutdown...", 1);
-  lcd?.lcd.backlight().off();
-  cp.execSync("shutdown -h now");
 }
