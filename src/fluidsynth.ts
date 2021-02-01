@@ -36,8 +36,6 @@ export class FluidSynth {
   }
 
   start() {
-    this.soundFontLibrary.loadFontList();
-
     return new Promise((resolve, reject) => {
       let blockForReady = true;
 
@@ -112,5 +110,6 @@ export class FluidSynth {
     this.lcdPrint("restart synth", 1);
     this.process.kill();
     await this.start();
+    this.soundFontLibrary.loadFontList();
   }
 }

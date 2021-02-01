@@ -40,7 +40,6 @@ class FluidSynth {
         });
     }
     start() {
-        this.soundFontLibrary.loadFontList();
         return new Promise((resolve, reject) => {
             let blockForReady = true;
             this.process = child_process_1.default.spawn("fluidsynth", this.fluidsynthArgs.split(" "));
@@ -113,6 +112,7 @@ class FluidSynth {
             this.lcdPrint("restart synth", 1);
             this.process.kill();
             yield this.start();
+            this.soundFontLibrary.loadFontList();
         });
     }
 }
