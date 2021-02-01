@@ -3,10 +3,8 @@ dotenv.config();
 import cp from "child_process";
 import express from "express";
 import http from "http";
-import { startFluidSynth } from "./fluidsynth";
+import { FluidSynth } from "./fluidsynth";
 import path from "path";
-import os from "os";
-import fs from "fs";
 import fileUpload from "express-fileupload";
 import bodyParser from "body-parser";
 import { Server } from "socket.io";
@@ -17,7 +15,7 @@ const io = new Server(server);
 
 import chalk from "chalk";
 import { Log, ringlog } from "./ringlog";
-import { uploadHandler } from "./upload";
+// import { uploadHandler } from "./upload";
 import { LCD } from "./lcd";
 import { Dial } from "./dial";
 
@@ -34,22 +32,25 @@ app.use(express.static(path.join(__dirname, "..", "node_modules")));
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Upload soundfont - have to figure out how to get this work on insecure domain
-app.post(
-  "/upload",
-  uploadHandler(log, () => (soundfonts = initialiseSoundFonts()))
-);
-
-const aconnectArgs = process.env.ACONNECT_ARGS || "16:0 128:0";
-let soundfonts: string[];
-let currentSoundfont: string;
-let loadedFontID = 1;
-let currentSoundfontIndex: number;
+// app.post(
+//   "/upload",
+//   uploadHandler(log, () => (soundfonts = initialiseSoundFonts()))
+// );
 
 const lcd =
   (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new LCD()
     : null;
 
+log(`LCD ${lcd ? "enabled" : "disabled"}`);
+const lcdPrint = (msg: string, line: number) => {
+  if (lcd) {
+    lcd.print((msg || "").padEnd(16, " "), line);
+  }
+};
+lcdPrint("Starting...", 0);
+
+const fluidsynth = new FluidSynth(lcdPrint);
 /**
  * Rotary Dial
  */
@@ -57,13 +58,10 @@ let shutdownMode = false;
 const _ =
   (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
     ? new Dial({
-        onDown: () => {
-          currentSoundfontIndex--;
-          if (currentSoundfontIndex < 0) {
-            currentSoundfontIndex = soundfonts.length - 1;
-          }
-          loadSoundFont(currentSoundfontIndex);
-        },
+        onDown: () =>
+          fluidsynth
+            .loadPreviousFont()
+            .then(() => lcdPrint(fluidsynth.currentSoundFont, 0)),
         onPress: () => {
           console.log("Press handler");
           if (shutdownMode) {
@@ -77,54 +75,12 @@ const _ =
             lcd?.print(previousLCD?.[0], 0);
           }, 3000);
         },
-        onUp: () => {
-          currentSoundfontIndex++;
-          currentSoundfontIndex = currentSoundfontIndex % soundfonts.length;
-          loadSoundFont(currentSoundfontIndex);
-        },
+        onUp: () =>
+          fluidsynth
+            .loadNextFont()
+            .then(() => lcdPrint(fluidsynth.currentSoundFont, 0)),
       })
     : null;
-log(`LCD ${lcd ? "enabled" : "disabled"}`);
-const lcdPrint = (msg: string, line: number) => {
-  if (lcd) {
-    lcd.print((msg || "").padEnd(16, " "), line);
-  }
-};
-lcdPrint("Starting...", 0);
-let fluidsynth = initialiseFluidsynth();
-
-function initialiseSoundFonts() {
-  const sf = fs.readdirSync(path.join(__dirname, "..", "soundfonts"));
-  const defaultSoundfont = process.env.DEFAULT_SOUNDFONT;
-  currentSoundfont =
-    defaultSoundfont && sf.includes(defaultSoundfont)
-      ? defaultSoundfont
-      : "Loft.sf2";
-  log(`Found soundfonts: \n * ${sf.join("\n * ")}`);
-  return sf;
-}
-
-async function initialiseFluidsynth() {
-  const defaultFluidsynthArgs =
-    "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os.type() === "Linux"
-      ? " --audio-driver=alsa"
-      : "";
-  const argsFromEnv = process.env.FLUIDSYNTH_ARGS;
-  const fluidsynthArgs = argsFromEnv || defaultFluidsynthArgs;
-
-  log(`FluidSynth args: ${fluidsynthArgs}`);
-  const fluidsynth = await startFluidSynth(fluidsynthArgs, aconnectArgs);
-  log("Ready");
-  lcdPrint("", 1);
-  loadedFontID = 1;
-  soundfonts = initialiseSoundFonts();
-  currentSoundfontIndex = soundfonts.indexOf(currentSoundfont);
-  const font = soundfonts[currentSoundfontIndex];
-  fluidsynth.stdin.write(`load soundfonts/${font}\n`);
-  fluidsynth.stdin.write("fonts\n");
-  lcdPrint(font, 0);
-  return fluidsynth;
-}
 
 server.listen(3000);
 log("Webapp listening on port 3000");
@@ -139,8 +95,8 @@ io.on("connection", (client) => {
   );
   client.on("getinstruments", () =>
     io.emit("instrumentdump", {
-      fonts: soundfonts,
-      currentSoundfont,
+      fonts: fluidsynth.getFontList(),
+      currentSoundfont: fluidsynth.currentSoundFont,
     })
   );
   client.on("changeinst", loadSoundFont);
@@ -149,30 +105,14 @@ io.on("connection", (client) => {
 });
 
 async function loadSoundFont(index: number) {
-  const font = soundfonts[index];
-
-  log(`Changing to ${font}...`);
-  if (loadedFontID === 22) {
-    await restartFluidsynth();
-  }
-  lcdPrint(`loading...`, 0);
-  fluidsynth.then((fluidsynth) => {
-    fluidsynth.stdin.write(`unload ${loadedFontID++}\n`);
-    currentSoundfont = font;
-    fluidsynth.stdin.write(`load soundfonts/${font}\n`);
-    fluidsynth.stdin.write(`fonts\n`);
-    lcdPrint(font, 0);
+  fluidsynth.ready.then(() => {
+    const font = fluidsynth.getFontList()[index];
+    fluidsynth.loadFont(font);
   });
 }
 
 async function restartFluidsynth() {
-  log("Killing fluidsynth...");
-  lcdPrint("restart synth", 1);
-  fluidsynth.then((f) => {
-    ringlog.clear();
-    f.kill();
-    fluidsynth = initialiseFluidsynth();
-  });
+  fluidsynth.restart();
 }
 
 function shutdown() {

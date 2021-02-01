@@ -77,9 +77,7 @@ function rotaryEncoder({
   };
 
   bPin.on("change", handler);
-
   aPin.on("change", handler);
-
   pressButton.on("up", () => onPress());
 }
 
