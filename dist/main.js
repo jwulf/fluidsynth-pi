@@ -49,7 +49,7 @@ const lcd = (process.env.ENABLE_LCD || "false").toLowerCase() === "true"
 log(`LCD ${lcd ? "enabled" : "disabled"}`);
 const lcdPrint = (msg, line) => {
     if (lcd) {
-        lcd.print((msg || "").padEnd(16, " "), line);
+        return lcd.print((msg || "").padEnd(16, " "), line);
     }
 };
 lcdPrint("Starting...", 0);

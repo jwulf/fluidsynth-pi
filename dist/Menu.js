@@ -78,11 +78,13 @@ class Menu {
         };
         this.systemMenu = new SystemMenu(this.lcdPrint, fluidsynth);
         this.fluidsynth.on("fontLoading", () => {
+            log("Loading...");
             if (this.mode === "FONTS") {
                 lcdPrint("Loading...", 1);
             }
         });
         this.fluidsynth.on("fontLoaded", () => {
+            log("Loaded");
             if (this.mode === "FONTS") {
                 lcdPrint("", 1);
             }
