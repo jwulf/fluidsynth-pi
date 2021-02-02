@@ -110,31 +110,26 @@ export class Menu {
     this.lcdPrint("Loading...", 1);
   }
 
-  private setFontMode() {
-    this.mode = "FONTS";
-    this.lcdPrint("", 1);
-    this.lcdPrint(this.fluidsynth.currentSoundFont, 0);
-  }
-
-  private setSystemMode() {
-    this.mode = "SYSTEM";
-    this.systemMenu.show();
-  }
-
   public setMode = (mode: MenuMode) => {
     log(`Menu: ${mode}`);
+    this.mode = mode;
     switch (mode) {
       case "FONTS": {
-        this.setFontMode();
+        this.lcdPrint("", 1);
+        this.lcdPrint(this.fluidsynth.currentSoundFont, 0);
         break;
       }
       case "SYSTEM": {
-        this.setSystemMode();
+        this.systemMenu.show();
         break;
       }
       case "UNSTARTED": {
         this.lcdPrint("Connect keyboard", 0);
         this.lcdPrint("& push dial...", 1);
+        break;
+      }
+      case "FONTSCROLLER": {
+        this.fontScroller.show();
         break;
       }
     }
