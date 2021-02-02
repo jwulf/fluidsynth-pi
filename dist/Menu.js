@@ -24,7 +24,9 @@ class Menu {
                     break;
                 }
                 case "UNSTARTED": {
-                    child_process_1.default.execSync("init 6");
+                    this.lcdPrint("Restarting...", 0);
+                    this.lcdPrint("", 1);
+                    setTimeout(() => child_process_1.default.execSync("init 6"), 800);
                     // Need to get hotplugging to work
                     // This is not enough:
                     // modprobe -a snd_seq_midi snd_seq_midi_event snd_seq
@@ -114,28 +116,34 @@ class SystemMenu {
         this.options = ["Restart synth", "Shutdown", "Exit menu"];
         this.shutdownMode = false;
     }
-    print() {
+    displayMenu() {
         const msg = this.options[this.index].padEnd(14, " ");
         this.lcdPrint(`:arrowright: ${msg}`, 0);
     }
     show() {
         this.index = 0;
         this.lcdPrint("", 1);
-        this.print();
+        this.displayMenu();
     }
     showNext() {
+        if (this.shutdownMode) {
+            return;
+        }
         this.index++;
         if (this.index > this.options.length - 1) {
             this.index = 0;
         }
-        this.print();
+        this.displayMenu();
     }
     showPrevious() {
+        if (this.shutdownMode) {
+            return;
+        }
         this.index--;
         if (this.index < 0) {
             this.index = this.options.length - 1;
         }
-        this.print();
+        this.displayMenu();
     }
     handlePress(setMode) {
         switch (this.index) {
@@ -152,11 +160,12 @@ class SystemMenu {
                     this.doShutdown();
                 }
                 else {
-                    this.lcdPrint("Press to shutdown", 0);
+                    this.lcdPrint("Confirm shutdown?", 1);
                     this.shutdownMode = true;
                     setTimeout(() => {
                         this.shutdownMode = false;
-                        this.print();
+                        this.lcdPrint("", 1);
+                        this.displayMenu();
                     }, 3000);
                 }
                 break;
@@ -165,8 +174,9 @@ class SystemMenu {
     }
     doShutdown() {
         log("Shutting down computer...");
-        this.lcdPrint("Shutdown...", 1);
-        child_process_1.default.execSync("shutdown -h now");
+        this.lcdPrint("", 0);
+        this.lcdPrint("Shutdown.", 1);
+        setTimeout(() => child_process_1.default.execSync("shutdown -h now"), 800);
     }
 }
 SystemMenu.RESTART = 0;
