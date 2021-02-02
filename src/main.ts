@@ -55,10 +55,10 @@ process.on("exit", (code) => {
   lcdPrint("", 1);
 });
 
-const fluidsynth = new FluidSynth(
+const fluidsynth: FluidSynth = new FluidSynth(
   lcdPrint,
-  () => menu.setMode("FONTS"),
-  () => menu.setMode("UNSTARTED")
+  () => menu?.setMode("FONTS"),
+  () => menu?.setMode("UNSTARTED")
 );
 const menu = new Menu(fluidsynth, lcdPrint);
 

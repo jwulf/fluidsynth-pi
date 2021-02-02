@@ -18,8 +18,8 @@ export class FluidSynth extends EventEmitter {
 
   constructor(
     private lcdPrint: (msg: string, line: number) => void,
-    private onSuccess: () => void,
-    private onError: (error: string) => void
+    onSuccess: () => void,
+    onError: (error: string) => void
   ) {
     super();
     const defaultFluidsynthArgs =
@@ -37,8 +37,8 @@ export class FluidSynth extends EventEmitter {
     this.soundFontLibrary = new SoundFontLibrary();
     this.ready = this.start()
       .then(() => this._loadFont(this.soundFontLibrary.currentSoundfont))
-      .then(this.onSuccess)
-      .catch(this.onError);
+      .then(onSuccess)
+      .catch(onError);
   }
 
   start() {
@@ -122,7 +122,8 @@ export class FluidSynth extends EventEmitter {
     this.log("Killing fluidsynth...");
     this.lcdPrint("restart synth", 1);
     this.process.kill();
-    await this.start();
-    this.soundFontLibrary.loadFontList();
+    return this.start()
+      .then(() => this.soundFontLibrary.loadFontList())
+      .then(() => this._loadFont(this.soundFontLibrary.currentSoundfont));
   }
 }

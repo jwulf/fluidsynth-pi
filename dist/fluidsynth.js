@@ -23,8 +23,6 @@ class FluidSynth extends events_1.EventEmitter {
     constructor(lcdPrint, onSuccess, onError) {
         super();
         this.lcdPrint = lcdPrint;
-        this.onSuccess = onSuccess;
-        this.onError = onError;
         this.log = ringlog_1.Log(chalk_1.default.green);
         this.loadedFontCount = 0;
         const defaultFluidsynthArgs = "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os_1.default.type() ===
@@ -40,8 +38,8 @@ class FluidSynth extends events_1.EventEmitter {
         this.soundFontLibrary = new SoundFontLibrary_1.SoundFontLibrary();
         this.ready = this.start()
             .then(() => this._loadFont(this.soundFontLibrary.currentSoundfont))
-            .then(this.onSuccess)
-            .catch(this.onError);
+            .then(onSuccess)
+            .catch(onError);
     }
     start() {
         return new Promise((resolve, reject) => {
@@ -124,8 +122,9 @@ class FluidSynth extends events_1.EventEmitter {
             this.log("Killing fluidsynth...");
             this.lcdPrint("restart synth", 1);
             this.process.kill();
-            yield this.start();
-            this.soundFontLibrary.loadFontList();
+            return this.start()
+                .then(() => this.soundFontLibrary.loadFontList())
+                .then(() => this._loadFont(this.soundFontLibrary.currentSoundfont));
         });
     }
 }
