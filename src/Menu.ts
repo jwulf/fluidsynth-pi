@@ -10,7 +10,7 @@ const log = Log(chalk.yellowBright);
 export class Menu {
   private mode: MenuMode = "UNSTARTED";
   public systemMenu: SystemMenu;
-  fontScroller: FontScroller;
+  private fontScroller: FontScroller;
   constructor(
     private fluidsynth: FluidSynth,
     private lcdPrint: (msg: string, line: number) => void
@@ -23,7 +23,10 @@ export class Menu {
       }
     });
     this.fontScroller = new FontScroller(fluidsynth, lcdPrint, (fontname) => {
-      this.fluidsynth.loadFont(fontname);
+      if (fontname !== this.fluidsynth.currentSoundFont) {
+        this.showLoadingMessage();
+        this.fluidsynth.loadFont(fontname);
+      }
       this.setMode("FONTS");
     });
   }

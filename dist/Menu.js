@@ -118,7 +118,10 @@ class Menu {
             }
         });
         this.fontScroller = new FontScroller(fluidsynth, lcdPrint, (fontname) => {
-            this.fluidsynth.loadFont(fontname);
+            if (fontname !== this.fluidsynth.currentSoundFont) {
+                this.showLoadingMessage();
+                this.fluidsynth.loadFont(fontname);
+            }
             this.setMode("FONTS");
         });
     }
