@@ -20,9 +20,11 @@ const ringlog_1 = require("./ringlog");
 const SoundFontLibrary_1 = require("./SoundFontLibrary");
 const events_1 = require("events");
 class FluidSynth extends events_1.EventEmitter {
-    constructor(lcdPrint) {
+    constructor(lcdPrint, onSuccess, onError) {
         super();
         this.lcdPrint = lcdPrint;
+        this.onSuccess = onSuccess;
+        this.onError = onError;
         this.log = ringlog_1.Log(chalk_1.default.green);
         this.loadedFontCount = 0;
         const defaultFluidsynthArgs = "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os_1.default.type() ===
@@ -36,10 +38,10 @@ class FluidSynth extends events_1.EventEmitter {
         lcdPrint("Starting...", 0);
         this.errorlog = ringlog_1.Log(chalk_1.default.redBright);
         this.soundFontLibrary = new SoundFontLibrary_1.SoundFontLibrary();
-        this.ready = this.start();
-        this.ready.then(() => {
-            this._loadFont(this.soundFontLibrary.currentSoundfont);
-        });
+        this.ready = this.start()
+            .then(() => this._loadFont(this.soundFontLibrary.currentSoundfont))
+            .then(this.onSuccess)
+            .catch(this.onError);
     }
     start() {
         return new Promise((resolve, reject) => {
@@ -49,7 +51,7 @@ class FluidSynth extends events_1.EventEmitter {
                 this.errorlog(error.toString());
                 if (blockForReady) {
                     blockForReady = false;
-                    return reject(error);
+                    return reject(error.toString());
                 }
             });
             this.process.stdout.on("data", (data) => {

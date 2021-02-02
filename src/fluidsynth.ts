@@ -16,7 +16,11 @@ export class FluidSynth extends EventEmitter {
   private fluidsynthArgs: string;
   private aconnectArgs: string;
 
-  constructor(private lcdPrint: (msg: string, line: number) => void) {
+  constructor(
+    private lcdPrint: (msg: string, line: number) => void,
+    private onSuccess: () => void,
+    private onError: (error: string) => void
+  ) {
     super();
     const defaultFluidsynthArgs =
       "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os.type() ===
@@ -31,10 +35,10 @@ export class FluidSynth extends EventEmitter {
     lcdPrint("Starting...", 0);
     this.errorlog = Log(chalk.redBright);
     this.soundFontLibrary = new SoundFontLibrary();
-    this.ready = this.start();
-    this.ready.then(() => {
-      this._loadFont(this.soundFontLibrary.currentSoundfont);
-    });
+    this.ready = this.start()
+      .then(() => this._loadFont(this.soundFontLibrary.currentSoundfont))
+      .then(this.onSuccess)
+      .catch(this.onError);
   }
 
   start() {
@@ -46,7 +50,7 @@ export class FluidSynth extends EventEmitter {
         this.errorlog(error.toString());
         if (blockForReady) {
           blockForReady = false;
-          return reject(error);
+          return reject(error.toString());
         }
       });
       this.process.stdout.on("data", (data) => {

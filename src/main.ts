@@ -55,11 +55,12 @@ process.on("exit", (code) => {
   lcdPrint("", 1);
 });
 
-const fluidsynth = new FluidSynth(lcdPrint);
+const fluidsynth = new FluidSynth(
+  lcdPrint,
+  () => menu.setMode("FONTS"),
+  () => menu.setMode("UNSTARTED")
+);
 const menu = new Menu(fluidsynth, lcdPrint);
-fluidsynth.ready
-  .then(() => menu.setMode("FONTS"))
-  .catch(() => menu.setMode("UNSTARTED"));
 
 /**
  * Rotary Dial
