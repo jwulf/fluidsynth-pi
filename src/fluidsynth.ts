@@ -61,7 +61,7 @@ export class FluidSynth extends EventEmitter {
           }
           return resolve(process);
         }
-        this.log(data.toString());
+        this.log(data.toString() + " >>");
       });
     });
   }
