@@ -47,7 +47,7 @@ const __dial = lcdEnabled
   : null;
 
 const webUIEnabled =
-  (process.env.WEBUI_DISABLED || "false").toLowerCase() !== "true";
+  (process.env.WEBUI_ENABLED || "true").toLowerCase() !== "false";
 
 log(`Web UI: ${webUIEnabled ? "enabled" : "disabled"}`);
 if (webUIEnabled) {

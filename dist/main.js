@@ -38,7 +38,7 @@ const __dial = lcdEnabled
         onUp: () => menu.onUp(),
     })
     : null;
-const webUIEnabled = (process.env.WEBUI_DISABLED || "false").toLowerCase() !== "true";
+const webUIEnabled = (process.env.WEBUI_ENABLED || "true").toLowerCase() !== "false";
 log(`Web UI: ${webUIEnabled ? "enabled" : "disabled"}`);
 if (webUIEnabled) {
     web_ui_1.startWebInterface(fluidsynth, menu);
