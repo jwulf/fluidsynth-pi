@@ -106,7 +106,7 @@ class SystemMenu {
         this.lcdPrint = lcdPrint;
         this.fluidsynth = fluidsynth;
         this.index = 0;
-        this.options = ["Restart synth", "Shutdown", "Fonts"];
+        this.options = ["Restart synth", "Shutdown", "Exit menu"];
         this.shutdownMode = false;
     }
     print() {

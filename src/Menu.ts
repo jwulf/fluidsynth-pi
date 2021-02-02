@@ -114,7 +114,7 @@ class SystemMenu {
   static SHUTDOWN = 1 as const;
   static FONTS = 2 as const;
   private index = 0;
-  private options = ["Restart synth", "Shutdown", "Fonts"];
+  private options = ["Restart synth", "Shutdown", "Exit menu"];
   private shutdownMode = false;
   constructor(
     private lcdPrint: (msg: string, line: number) => void,
