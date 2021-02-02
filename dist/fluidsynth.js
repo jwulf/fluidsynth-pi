@@ -18,8 +18,10 @@ const chalk_1 = __importDefault(require("chalk"));
 const os_1 = __importDefault(require("os"));
 const ringlog_1 = require("./ringlog");
 const SoundFontLibrary_1 = require("./SoundFontLibrary");
-class FluidSynth {
+const events_1 = require("events");
+class FluidSynth extends events_1.EventEmitter {
     constructor(lcdPrint) {
+        super();
         this.lcdPrint = lcdPrint;
         this.log = ringlog_1.Log(chalk_1.default.green);
         this.loadedFontCount = 0;
@@ -46,18 +48,19 @@ class FluidSynth {
             this.process.stderr.on("data", (error) => this.errorlog(error.toString()));
             this.process.stdout.on("data", (data) => {
                 const message = data.toString();
-                if (blockForReady && message.includes(">")) {
-                    blockForReady = false;
-                    if (os_1.default.type() === "Linux") {
-                        try {
-                            child_process_1.default.execSync(`aconnect ${this.aconnectArgs}`);
+                if (message.includes("soundfonts/") && !message.includes)
+                    if (blockForReady && message.includes(">")) {
+                        blockForReady = false;
+                        if (os_1.default.type() === "Linux") {
+                            try {
+                                child_process_1.default.execSync(`aconnect ${this.aconnectArgs}`);
+                            }
+                            catch (e) {
+                                return reject(e);
+                            }
                         }
-                        catch (e) {
-                            return reject(e);
-                        }
+                        return resolve(process);
                     }
-                    return resolve(process);
-                }
                 this.log(data.toString());
             });
         });

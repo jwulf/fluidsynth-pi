@@ -86,7 +86,7 @@ function loadSoundFont(index) {
         fluidsynth.ready.then(() => {
             const font = fluidsynth.getFontList()[index];
             fluidsynth.loadFont(font);
-            menu.setFontMode();
+            menu.setMode("FONTS");
         });
     });
 }

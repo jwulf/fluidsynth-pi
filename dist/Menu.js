@@ -33,27 +33,45 @@ class Menu {
                 });
             }
         };
+        this.onDown = () => {
+            if (this.mode === "FONTS") {
+                this.fluidsynth
+                    .loadPreviousFont()
+                    .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
+            }
+            if (this.mode === "SYSTEM") {
+                this.systemMenu.showPrevious();
+            }
+        };
+        this.onUp = () => {
+            if (this.mode === "FONTS") {
+                this.fluidsynth
+                    .loadNextFont()
+                    .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
+            }
+            if (this.mode === "SYSTEM") {
+                this.systemMenu.showNext();
+            }
+        };
+        this.setMode = (mode) => {
+            log(`Menu: ${mode}`);
+            switch (mode) {
+                case "FONTS": {
+                    this.setFontMode();
+                    break;
+                }
+                case "SYSTEM": {
+                    this.setSystemMode();
+                    break;
+                }
+                case "UNSTARTED": {
+                    this.lcdPrint("Connect keyboard", 0);
+                    this.lcdPrint("& push dial...", 1);
+                    break;
+                }
+            }
+        };
         this.systemMenu = new SystemMenu(this.lcdPrint, fluidsynth);
-    }
-    onDown() {
-        if (this.mode === "FONTS") {
-            this.fluidsynth
-                .loadPreviousFont()
-                .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
-        }
-        if (this.mode === "SYSTEM") {
-            this.systemMenu.showPrevious();
-        }
-    }
-    onUp() {
-        if (this.mode === "FONTS") {
-            this.fluidsynth
-                .loadNextFont()
-                .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
-        }
-        if (this.mode === "SYSTEM") {
-            this.systemMenu.showNext();
-        }
     }
     setFontMode() {
         this.mode = "FONTS";
@@ -63,23 +81,6 @@ class Menu {
     setSystemMode() {
         this.mode = "SYSTEM";
         this.systemMenu.show();
-    }
-    setMode(mode) {
-        switch (mode) {
-            case "FONTS": {
-                this.setFontMode();
-                break;
-            }
-            case "SYSTEM": {
-                this.setSystemMode();
-                break;
-            }
-            case "UNSTARTED": {
-                this.lcdPrint("Connect keyboard", 0);
-                this.lcdPrint("& push dial...", 1);
-                break;
-            }
-        }
     }
 }
 exports.Menu = Menu;

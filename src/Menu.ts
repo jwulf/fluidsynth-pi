@@ -38,7 +38,7 @@ export class Menu {
     }
   };
 
-  onDown() {
+  onDown = () => {
     if (this.mode === "FONTS") {
       this.fluidsynth
         .loadPreviousFont()
@@ -47,9 +47,9 @@ export class Menu {
     if (this.mode === "SYSTEM") {
       this.systemMenu.showPrevious();
     }
-  }
+  };
 
-  onUp() {
+  onUp = () => {
     if (this.mode === "FONTS") {
       this.fluidsynth
         .loadNextFont()
@@ -58,9 +58,9 @@ export class Menu {
     if (this.mode === "SYSTEM") {
       this.systemMenu.showNext();
     }
-  }
+  };
 
-  public setFontMode() {
+  private setFontMode() {
     this.mode = "FONTS";
     this.lcdPrint("", 1);
     this.lcdPrint(this.fluidsynth.currentSoundFont, 0);
@@ -71,7 +71,8 @@ export class Menu {
     this.systemMenu.show();
   }
 
-  public setMode(mode: MenuMode) {
+  public setMode = (mode: MenuMode) => {
+    log(`Menu: ${mode}`);
     switch (mode) {
       case "FONTS": {
         this.setFontMode();
@@ -87,7 +88,7 @@ export class Menu {
         break;
       }
     }
-  }
+  };
 }
 
 class SystemMenu {

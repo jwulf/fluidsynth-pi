@@ -3,8 +3,9 @@ import chalk from "chalk";
 import os from "os";
 import { Log, ringlog } from "./ringlog";
 import { SoundFontLibrary } from "./SoundFontLibrary";
+import { EventEmitter } from "events";
 
-export class FluidSynth {
+export class FluidSynth extends EventEmitter {
   ready: Promise<unknown>;
   currentSoundFont!: string;
   private soundFontLibrary: SoundFontLibrary;
@@ -16,6 +17,7 @@ export class FluidSynth {
   private aconnectArgs: string;
 
   constructor(private lcdPrint: (msg: string, line: number) => void) {
+    super();
     const defaultFluidsynthArgs =
       "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os.type() ===
       "Linux"
@@ -45,17 +47,18 @@ export class FluidSynth {
       );
       this.process.stdout.on("data", (data) => {
         const message = data.toString();
-        if (blockForReady && message.includes(">")) {
-          blockForReady = false;
-          if (os.type() === "Linux") {
-            try {
-              cp.execSync(`aconnect ${this.aconnectArgs}`);
-            } catch (e) {
-              return reject(e);
+        if (message.includes("soundfonts/") && !message.includes)
+          if (blockForReady && message.includes(">")) {
+            blockForReady = false;
+            if (os.type() === "Linux") {
+              try {
+                cp.execSync(`aconnect ${this.aconnectArgs}`);
+              } catch (e) {
+                return reject(e);
+              }
             }
+            return resolve(process);
           }
-          return resolve(process);
-        }
         this.log(data.toString());
       });
     });
