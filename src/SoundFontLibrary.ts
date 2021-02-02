@@ -35,6 +35,8 @@ export class SoundFontLibrary {
     }
     this.currentSoundfontIndex = sf.indexOf(currentSoundfont);
     log(`Found soundfonts: \n * ${sf.join("\n * ")}`);
+    this.currentSoundfont = currentSoundfont;
+    this.soundFonts = this.soundFonts;
     return { soundFonts: sf, currentSoundfont };
   }
 
