@@ -14,23 +14,28 @@ class Menu {
         this.lcdPrint = lcdPrint;
         this.mode = "UNSTARTED";
         this.onPress = () => {
-            if (this.mode === "FONTS") {
-                this.setSystemMode();
-            }
-            if (this.mode === "SYSTEM") {
-                this.systemMenu.handlePress(this.setMode);
-            }
-            if (this.mode === "UNSTARTED") {
-                this.fluidsynth
-                    .restart()
-                    .then(() => this.setFontMode())
-                    .catch(() => {
-                    this.lcdPrint("Failed to start", 0);
-                    this.lcdPrint("", 1);
-                    setTimeout(() => {
-                        this.setMode("UNSTARTED");
-                    }, 2000);
-                });
+            switch (this.mode) {
+                case "FONTS": {
+                    this.setMode("SYSTEM");
+                    break;
+                }
+                case "SYSTEM": {
+                    this.systemMenu.handlePress(this.setMode);
+                    break;
+                }
+                case "UNSTARTED": {
+                    this.fluidsynth
+                        .restart()
+                        .then(() => this.setFontMode())
+                        .catch(() => {
+                        this.lcdPrint("Failed to start", 0);
+                        this.lcdPrint("", 1);
+                        setTimeout(() => {
+                            this.setMode("UNSTARTED");
+                        }, 2000);
+                    });
+                    break;
+                }
             }
         };
         this.onDown = () => {
