@@ -185,15 +185,17 @@ class SystemMenu {
             case SystemMenuItem.UPDATE: {
                 this.updating = true;
                 this.lcdPrint("Updating...", 1);
-                try {
-                    log(child_process_1.default.execSync("git reset --hard").toString());
-                    log(child_process_1.default.execSync("git pull").toString());
-                    this.lcdPrint("Success", 1);
-                }
-                catch (e) {
-                    this.lcdPrint("Error", 1);
-                }
-                this.updating = false;
+                setTimeout(() => {
+                    try {
+                        log(child_process_1.default.execSync("git reset --hard").toString());
+                        log(child_process_1.default.execSync("git pull").toString());
+                        this.lcdPrint("Success", 1);
+                    }
+                    catch (e) {
+                        this.lcdPrint("Error", 1);
+                    }
+                    this.updating = false;
+                }, 800);
                 break;
             }
             default:
