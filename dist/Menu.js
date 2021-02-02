@@ -77,6 +77,16 @@ class Menu {
             }
         };
         this.systemMenu = new SystemMenu(this.lcdPrint, fluidsynth);
+        this.fluidsynth.on("fontLoading", () => {
+            if (this.mode === "FONTS") {
+                lcdPrint("Loading...", 1);
+            }
+        });
+        this.fluidsynth.on("fontLoaded", () => {
+            if (this.mode === "FONTS") {
+                lcdPrint("", 1);
+            }
+        });
     }
     setFontMode() {
         this.mode = "FONTS";
