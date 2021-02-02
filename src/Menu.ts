@@ -122,6 +122,7 @@ class SystemMenu {
   ) {}
 
   private print() {
+    this.lcdPrint("", 0);
     this.lcdPrint(`:arrowright: ${this.options[this.index]}`, 0);
   }
 
