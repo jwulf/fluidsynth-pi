@@ -47,18 +47,20 @@ export class FluidSynth extends EventEmitter {
       );
       this.process.stdout.on("data", (data) => {
         const message = data.toString();
-        if (message.includes("soundfonts/") && !message.includes)
-          if (blockForReady && message.includes(">")) {
-            blockForReady = false;
-            if (os.type() === "Linux") {
-              try {
-                cp.execSync(`aconnect ${this.aconnectArgs}`);
-              } catch (e) {
-                return reject(e);
-              }
+        if (message.includes("loaded SoundFont has ID")) {
+          this.emit("fontLoaded");
+        }
+        if (blockForReady && message.includes(">")) {
+          blockForReady = false;
+          if (os.type() === "Linux") {
+            try {
+              cp.execSync(`aconnect ${this.aconnectArgs}`);
+            } catch (e) {
+              return reject(e);
             }
-            return resolve(process);
           }
+          return resolve(process);
+        }
         this.log(data.toString());
       });
     });

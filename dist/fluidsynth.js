@@ -48,19 +48,21 @@ class FluidSynth extends events_1.EventEmitter {
             this.process.stderr.on("data", (error) => this.errorlog(error.toString()));
             this.process.stdout.on("data", (data) => {
                 const message = data.toString();
-                if (message.includes("soundfonts/") && !message.includes)
-                    if (blockForReady && message.includes(">")) {
-                        blockForReady = false;
-                        if (os_1.default.type() === "Linux") {
-                            try {
-                                child_process_1.default.execSync(`aconnect ${this.aconnectArgs}`);
-                            }
-                            catch (e) {
-                                return reject(e);
-                            }
+                if (message.includes("loaded SoundFont has ID")) {
+                    this.emit("fontLoaded");
+                }
+                if (blockForReady && message.includes(">")) {
+                    blockForReady = false;
+                    if (os_1.default.type() === "Linux") {
+                        try {
+                            child_process_1.default.execSync(`aconnect ${this.aconnectArgs}`);
                         }
-                        return resolve(process);
+                        catch (e) {
+                            return reject(e);
+                        }
                     }
+                    return resolve(process);
+                }
                 this.log(data.toString());
             });
         });
