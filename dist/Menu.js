@@ -110,8 +110,8 @@ class SystemMenu {
         this.shutdownMode = false;
     }
     print() {
-        this.lcdPrint("", 0);
-        this.lcdPrint(`:arrowright: ${this.options[this.index]}`, 0);
+        const msg = this.options[this.index].padEnd(14, " ");
+        this.lcdPrint(`:arrowright: ${msg}`, 0);
     }
     show() {
         this.index = 0;
