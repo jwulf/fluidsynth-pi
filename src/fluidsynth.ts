@@ -5,6 +5,8 @@ import { Log, ringlog } from "./ringlog";
 import { SoundFontLibrary } from "./SoundFontLibrary";
 import { EventEmitter } from "events";
 
+const priority = process.env.FLUIDSYNTH_PRIORITY || "0";
+
 export class FluidSynth extends EventEmitter {
   ready: Promise<unknown>;
   currentSoundFont!: string;
@@ -45,7 +47,12 @@ export class FluidSynth extends EventEmitter {
     return new Promise((resolve, reject) => {
       let blockForReady = true;
 
-      this.process = cp.spawn("fluidsynth", this.fluidsynthArgs.split(" "));
+      this.process = cp.spawn("nice", [
+        "-n",
+        priority,
+        "fluidsynth",
+        ...this.fluidsynthArgs.split(" "),
+      ]);
       this.process.stderr.on("data", (error) => {
         this.errorlog(error.toString());
         if (blockForReady) {

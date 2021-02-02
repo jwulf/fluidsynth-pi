@@ -19,6 +19,7 @@ const os_1 = __importDefault(require("os"));
 const ringlog_1 = require("./ringlog");
 const SoundFontLibrary_1 = require("./SoundFontLibrary");
 const events_1 = require("events");
+const priority = process.env.FLUIDSYNTH_PRIORITY || "0";
 class FluidSynth extends events_1.EventEmitter {
     constructor(lcdPrint, onSuccess, onError) {
         super();
@@ -44,7 +45,12 @@ class FluidSynth extends events_1.EventEmitter {
     start() {
         return new Promise((resolve, reject) => {
             let blockForReady = true;
-            this.process = child_process_1.default.spawn("fluidsynth", this.fluidsynthArgs.split(" "));
+            this.process = child_process_1.default.spawn("nice", [
+                "-n",
+                priority,
+                "fluidsynth",
+                ...this.fluidsynthArgs.split(" "),
+            ]);
             this.process.stderr.on("data", (error) => {
                 this.errorlog(error.toString());
                 if (blockForReady) {

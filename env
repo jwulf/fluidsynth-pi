@@ -1,0 +1,10 @@
+# Configuration file with defaults
+# Rename this file to .env and uncomment any options that you want to change
+
+# FLUIDSYNTH_PRIORITY=-10  # Nice value from -20 (high) to 19 (low)
+# LCD_ENABLED=false  # Enable LCD and Rotary Dial
+# WEBUI_ENABLED=true # Enable Web UI
+# ROTARY_DELAY=500 # millisecond debounce for rotary Dial
+# FLUIDSYNTH_ARGS="--sample-rate 48000 --gain 3 -o synth.polyphony=16" 
+# ACONNECT_ARGS="16:0 128:0"
+# DEFAULT_SOUNDFONT=   # Default soundfont filename to load on start
