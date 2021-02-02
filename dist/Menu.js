@@ -98,7 +98,7 @@ class SystemMenu {
         this.shutdownMode = false;
     }
     print() {
-        this.lcdPrint(this.options[this.index], 0);
+        this.lcdPrint(`:arrowright: ${this.options[this.index]}`, 0);
     }
     show() {
         this.index = 0;

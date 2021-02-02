@@ -38,6 +38,7 @@ class LCD {
                 rows: 2,
                 cols: 20,
             });
+            this.lcd.useChar("arrowright");
         });
     }
     print(message = "", lineNum = 0) {
