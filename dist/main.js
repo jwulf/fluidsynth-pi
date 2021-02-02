@@ -53,6 +53,10 @@ const lcdPrint = (msg, line) => {
     }
 };
 lcdPrint("Starting...", 0);
+process.on("exit", (code) => {
+    lcdPrint("Stopped...", 0);
+    lcdPrint("", 1);
+});
 const fluidsynth = new fluidsynth_1.FluidSynth(lcdPrint);
 const menu = new Menu_1.Menu(fluidsynth, lcdPrint);
 fluidsynth.ready
