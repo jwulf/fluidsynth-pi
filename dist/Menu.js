@@ -189,6 +189,7 @@ class SystemMenu {
             }
             case SystemMenuItem.UPDATE: {
                 this.updating = true;
+                log("Updating git checkout...");
                 this.lcdPrint("Updating...", 1);
                 setTimeout(() => {
                     try {
