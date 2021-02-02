@@ -45,7 +45,13 @@ class FluidSynth extends events_1.EventEmitter {
         return new Promise((resolve, reject) => {
             let blockForReady = true;
             this.process = child_process_1.default.spawn("fluidsynth", this.fluidsynthArgs.split(" "));
-            this.process.stderr.on("data", (error) => this.errorlog(error.toString()));
+            this.process.stderr.on("data", (error) => {
+                this.errorlog(error.toString());
+                if (blockForReady) {
+                    blockForReady = false;
+                    return reject(error);
+                }
+            });
             this.process.stdout.on("data", (data) => {
                 const message = data.toString();
                 if (message.includes("loaded SoundFont has ID")) {

@@ -42,9 +42,13 @@ export class FluidSynth extends EventEmitter {
       let blockForReady = true;
 
       this.process = cp.spawn("fluidsynth", this.fluidsynthArgs.split(" "));
-      this.process.stderr.on("data", (error) =>
-        this.errorlog(error.toString())
-      );
+      this.process.stderr.on("data", (error) => {
+        this.errorlog(error.toString());
+        if (blockForReady) {
+          blockForReady = false;
+          return reject(error);
+        }
+      });
       this.process.stdout.on("data", (data) => {
         const message = data.toString();
         if (message.includes("loaded SoundFont has ID")) {
