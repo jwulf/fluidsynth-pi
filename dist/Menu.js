@@ -127,6 +127,7 @@ class SystemMenu {
     displayMenu() {
         const msg = this.options[this.index].padEnd(14, " ");
         this.lcdPrint(`:arrowright: ${msg}`, 0);
+        this.lcdPrint("", 1);
     }
     show() {
         this.index = 0;
@@ -183,6 +184,7 @@ class SystemMenu {
             }
             case SystemMenuItem.UPDATE: {
                 this.updating = true;
+                this.lcdPrint("Updating...", 1);
                 try {
                     log(child_process_1.default.execSync("git reset --hard").toString());
                     log(child_process_1.default.execSync("git pull").toString());
