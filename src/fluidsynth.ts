@@ -122,6 +122,7 @@ export class FluidSynth extends EventEmitter {
     this.log("Killing fluidsynth...");
     this.lcdPrint("restart synth", 1);
     this.process.kill();
+    this.loadedFontCount = 0;
     return this.start()
       .then(() => this.soundFontLibrary.loadFontList())
       .then(() => this._loadFont(this.soundFontLibrary.currentSoundfont));

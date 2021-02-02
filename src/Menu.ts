@@ -161,7 +161,8 @@ class SystemMenu {
         break;
       }
       case SystemMenu.RESTART: {
-        this.fluidsynth.restart();
+        this.fluidsynth.restart().then(() => setMode("FONTS"));
+
         break;
       }
       case SystemMenu.SHUTDOWN: {
