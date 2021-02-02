@@ -55,7 +55,7 @@ class Menu {
                     this.showLoadingMessage();
                     this.fluidsynth
                         .loadPreviousFont()
-                        .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont.replace(".sf2", ""), 0));
+                        .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
                     break;
                 }
                 case "SYSTEM": {
@@ -73,7 +73,7 @@ class Menu {
                     this.showLoadingMessage();
                     this.fluidsynth
                         .loadNextFont()
-                        .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont.replace(".sf2", ""), 0));
+                        .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
                     break;
                 }
                 case "SYSTEM": {
@@ -273,7 +273,7 @@ class FontScroller {
         this.callback(currentFont);
     }
     printFont() {
-        const msg = this.fonts[this.index].replace(".sf2", "").padEnd(14, " ");
+        const msg = this.fonts[this.index].padEnd(14, " ");
         this.lcdPrint(`:arrowright: ${msg}`, 0);
     }
 }

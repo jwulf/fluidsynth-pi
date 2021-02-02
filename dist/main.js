@@ -18,7 +18,7 @@ const lcd = lcdEnabled ? new lcd_1.LCD() : null;
 log(`LCD ${lcdEnabled ? "enabled" : "disabled"}`);
 const lcdPrint = (msg, line) => {
     if (lcd) {
-        return lcd.print((msg || "").padEnd(16, " "), line);
+        return lcd.print((msg || "").replace(".sf2", "").padEnd(16, " "), line);
     }
 };
 lcdPrint("Starting...", 0);
