@@ -3,13 +3,14 @@ import cp from "child_process";
 import { Log } from "./ringlog";
 import chalk from "chalk";
 
-type MenuMode = "UNSTARTED" | "FONTS" | "SYSTEM";
+type MenuMode = "UNSTARTED" | "FONTS" | "SYSTEM" | "FONTSCROLLER";
 
 const log = Log(chalk.yellowBright);
 
 export class Menu {
   private mode: MenuMode = "UNSTARTED";
   public systemMenu: SystemMenu;
+  fontScroller: FontScroller;
   constructor(
     private fluidsynth: FluidSynth,
     private lcdPrint: (msg: string, line: number) => void
@@ -21,10 +22,18 @@ export class Menu {
         lcdPrint("", 1);
       }
     });
+    this.fontScroller = new FontScroller(fluidsynth, lcdPrint, (fontname) => {
+      this.fluidsynth.loadFont(fontname);
+      this.setMode("FONTS");
+    });
   }
 
   onPress = () => {
     switch (this.mode) {
+      case "FONTSCROLLER": {
+        this.fontScroller.onPress();
+        break;
+      }
       case "FONTS": {
         this.setMode("SYSTEM");
         break;
@@ -58,26 +67,41 @@ export class Menu {
   };
 
   onDown = () => {
-    if (this.mode === "FONTS") {
-      this.showLoadingMessage();
-      this.fluidsynth
-        .loadPreviousFont()
-        .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
-    }
-    if (this.mode === "SYSTEM") {
-      this.systemMenu.showPrevious();
+    switch (this.mode) {
+      case "FONTS": {
+        this.showLoadingMessage();
+        this.fluidsynth
+          .loadPreviousFont()
+          .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
+        break;
+      }
+      case "SYSTEM": {
+        this.systemMenu.showPrevious();
+        break;
+      }
+      case "FONTSCROLLER": {
+        this.fontScroller.onDown();
+      }
     }
   };
 
   onUp = () => {
-    if (this.mode === "FONTS") {
-      this.showLoadingMessage();
-      this.fluidsynth
-        .loadNextFont()
-        .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
-    }
-    if (this.mode === "SYSTEM") {
-      this.systemMenu.showNext();
+    switch (this.mode) {
+      case "FONTS": {
+        this.showLoadingMessage();
+        this.fluidsynth
+          .loadNextFont()
+          .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
+        break;
+      }
+      case "SYSTEM": {
+        this.systemMenu.showNext();
+        break;
+      }
+      case "FONTSCROLLER": {
+        this.fontScroller.onUp();
+        break;
+      }
     }
   };
 
@@ -118,13 +142,15 @@ export class Menu {
 }
 
 enum SystemMenuItem {
-  RESTART = 0,
-  UPDATE = 1,
-  SHUTDOWN = 2,
-  FONTS = 3,
+  SOUND = 0,
+  RESTART = 1,
+  UPDATE = 2,
+  SHUTDOWN = 3,
+  EXIT = 4,
 }
 
 const SystemMenuItemLabels = [
+  "Choose Sound",
   "Restart synth",
   "Update Code",
   "Shutdown",
@@ -179,7 +205,11 @@ class SystemMenu {
       return;
     }
     switch (this.index) {
-      case SystemMenuItem.FONTS: {
+      case SystemMenuItem.SOUND: {
+        setMode("FONTSCROLLER");
+        break;
+      }
+      case SystemMenuItem.EXIT: {
         setMode("FONTS");
         break;
       }
@@ -230,5 +260,46 @@ class SystemMenu {
     this.lcdPrint("", 0);
     this.lcdPrint("Shutdown.", 1);
     setTimeout(() => cp.execSync("shutdown -h now"), 800);
+  }
+}
+
+class FontScroller {
+  fonts!: string[];
+  index!: number;
+  constructor(
+    private fluidsynth: FluidSynth,
+    private lcdPrint: (msg: string, line: number) => void,
+    private callback: (fontname: string) => void
+  ) {}
+
+  show() {
+    this.fonts = this.fluidsynth.getFontList();
+    this.index = this.fonts.indexOf(this.fluidsynth.currentSoundFont);
+    this.lcdPrint("", 1);
+    this.printFont();
+  }
+
+  onUp() {
+    this.index++;
+    this.index = this.index % this.fonts.length;
+    this.printFont();
+  }
+
+  onDown() {
+    this.index--;
+    if (this.index < 0) {
+      this.index = this.fonts.length - 1;
+    }
+    this.printFont();
+  }
+
+  onPress() {
+    const currentFont = this.fonts[this.index];
+    this.callback(currentFont);
+  }
+
+  private printFont() {
+    const msg = this.fonts[this.index].padEnd(14, " ");
+    this.lcdPrint(`:arrowright: ${msg}`, 0);
   }
 }

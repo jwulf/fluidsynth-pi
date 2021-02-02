@@ -15,6 +15,10 @@ class Menu {
         this.mode = "UNSTARTED";
         this.onPress = () => {
             switch (this.mode) {
+                case "FONTSCROLLER": {
+                    this.fontScroller.onPress();
+                    break;
+                }
                 case "FONTS": {
                     this.setMode("SYSTEM");
                     break;
@@ -46,25 +50,40 @@ class Menu {
             }
         };
         this.onDown = () => {
-            if (this.mode === "FONTS") {
-                this.showLoadingMessage();
-                this.fluidsynth
-                    .loadPreviousFont()
-                    .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
-            }
-            if (this.mode === "SYSTEM") {
-                this.systemMenu.showPrevious();
+            switch (this.mode) {
+                case "FONTS": {
+                    this.showLoadingMessage();
+                    this.fluidsynth
+                        .loadPreviousFont()
+                        .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
+                    break;
+                }
+                case "SYSTEM": {
+                    this.systemMenu.showPrevious();
+                    break;
+                }
+                case "FONTSCROLLER": {
+                    this.fontScroller.onDown();
+                }
             }
         };
         this.onUp = () => {
-            if (this.mode === "FONTS") {
-                this.showLoadingMessage();
-                this.fluidsynth
-                    .loadNextFont()
-                    .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
-            }
-            if (this.mode === "SYSTEM") {
-                this.systemMenu.showNext();
+            switch (this.mode) {
+                case "FONTS": {
+                    this.showLoadingMessage();
+                    this.fluidsynth
+                        .loadNextFont()
+                        .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
+                    break;
+                }
+                case "SYSTEM": {
+                    this.systemMenu.showNext();
+                    break;
+                }
+                case "FONTSCROLLER": {
+                    this.fontScroller.onUp();
+                    break;
+                }
             }
         };
         this.setMode = (mode) => {
@@ -92,6 +111,10 @@ class Menu {
                 lcdPrint("", 1);
             }
         });
+        this.fontScroller = new FontScroller(fluidsynth, lcdPrint, (fontname) => {
+            this.fluidsynth.loadFont(fontname);
+            this.setMode("FONTS");
+        });
     }
     showLoadingMessage() {
         log("Loading...");
@@ -110,12 +133,14 @@ class Menu {
 exports.Menu = Menu;
 var SystemMenuItem;
 (function (SystemMenuItem) {
-    SystemMenuItem[SystemMenuItem["RESTART"] = 0] = "RESTART";
-    SystemMenuItem[SystemMenuItem["UPDATE"] = 1] = "UPDATE";
-    SystemMenuItem[SystemMenuItem["SHUTDOWN"] = 2] = "SHUTDOWN";
-    SystemMenuItem[SystemMenuItem["FONTS"] = 3] = "FONTS";
+    SystemMenuItem[SystemMenuItem["SOUND"] = 0] = "SOUND";
+    SystemMenuItem[SystemMenuItem["RESTART"] = 1] = "RESTART";
+    SystemMenuItem[SystemMenuItem["UPDATE"] = 2] = "UPDATE";
+    SystemMenuItem[SystemMenuItem["SHUTDOWN"] = 3] = "SHUTDOWN";
+    SystemMenuItem[SystemMenuItem["EXIT"] = 4] = "EXIT";
 })(SystemMenuItem || (SystemMenuItem = {}));
 const SystemMenuItemLabels = [
+    "Choose Sound",
     "Restart synth",
     "Update Code",
     "Shutdown",
@@ -164,7 +189,11 @@ class SystemMenu {
             return;
         }
         switch (this.index) {
-            case SystemMenuItem.FONTS: {
+            case SystemMenuItem.SOUND: {
+                setMode("FONTSCROLLER");
+                break;
+            }
+            case SystemMenuItem.EXIT: {
                 setMode("FONTS");
                 break;
             }
@@ -216,5 +245,38 @@ class SystemMenu {
         this.lcdPrint("", 0);
         this.lcdPrint("Shutdown.", 1);
         setTimeout(() => child_process_1.default.execSync("shutdown -h now"), 800);
+    }
+}
+class FontScroller {
+    constructor(fluidsynth, lcdPrint, callback) {
+        this.fluidsynth = fluidsynth;
+        this.lcdPrint = lcdPrint;
+        this.callback = callback;
+    }
+    show() {
+        this.fonts = this.fluidsynth.getFontList();
+        this.index = this.fonts.indexOf(this.fluidsynth.currentSoundFont);
+        this.lcdPrint("", 1);
+        this.printFont();
+    }
+    onUp() {
+        this.index++;
+        this.index = this.index % this.fonts.length;
+        this.printFont();
+    }
+    onDown() {
+        this.index--;
+        if (this.index < 0) {
+            this.index = this.fonts.length - 1;
+        }
+        this.printFont();
+    }
+    onPress() {
+        const currentFont = this.fonts[this.index];
+        this.callback(currentFont);
+    }
+    printFont() {
+        const msg = this.fonts[this.index].padEnd(14, " ");
+        this.lcdPrint(`:arrowright: ${msg}`, 0);
     }
 }
