@@ -294,7 +294,7 @@ class FontScroller {
   }
 
   private printFont() {
-    const msg = this.fonts[this.index].padEnd(14, " ");
+    const msg = this.fonts[this.index].replace(".sf2", "").padEnd(14, " ");
     this.lcdPrint(`:arrowright: ${msg}`, 0);
   }
 }
