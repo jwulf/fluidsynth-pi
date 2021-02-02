@@ -119,14 +119,14 @@ export class Menu {
 
 enum SystemMenuItem {
   RESTART = 0,
-  SHUTDOWN = 1,
-  UPDATE = 2,
+  UPDATE = 1,
+  SHUTDOWN = 2,
   FONTS = 3,
 }
 
 class SystemMenu {
   private index: SystemMenuItem = SystemMenuItem.RESTART;
-  private options = ["Restart synth", "Shutdown", "Update Code", "Exit menu"];
+  private options = ["Restart synth", "Update Code", "Shutdown", "Exit menu"];
   private shutdownMode = false;
   private updating = false;
   constructor(

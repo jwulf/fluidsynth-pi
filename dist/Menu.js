@@ -111,8 +111,8 @@ exports.Menu = Menu;
 var SystemMenuItem;
 (function (SystemMenuItem) {
     SystemMenuItem[SystemMenuItem["RESTART"] = 0] = "RESTART";
-    SystemMenuItem[SystemMenuItem["SHUTDOWN"] = 1] = "SHUTDOWN";
-    SystemMenuItem[SystemMenuItem["UPDATE"] = 2] = "UPDATE";
+    SystemMenuItem[SystemMenuItem["UPDATE"] = 1] = "UPDATE";
+    SystemMenuItem[SystemMenuItem["SHUTDOWN"] = 2] = "SHUTDOWN";
     SystemMenuItem[SystemMenuItem["FONTS"] = 3] = "FONTS";
 })(SystemMenuItem || (SystemMenuItem = {}));
 class SystemMenu {
@@ -120,7 +120,7 @@ class SystemMenu {
         this.lcdPrint = lcdPrint;
         this.fluidsynth = fluidsynth;
         this.index = SystemMenuItem.RESTART;
-        this.options = ["Restart synth", "Shutdown", "Update Code", "Exit menu"];
+        this.options = ["Restart synth", "Update Code", "Shutdown", "Exit menu"];
         this.shutdownMode = false;
         this.updating = false;
     }
