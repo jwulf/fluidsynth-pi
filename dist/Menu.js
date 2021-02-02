@@ -190,9 +190,11 @@ class SystemMenu {
                         log(child_process_1.default.execSync("git reset --hard").toString());
                         log(child_process_1.default.execSync("git pull").toString());
                         this.lcdPrint("Success", 1);
+                        log("Update succeeded");
                     }
                     catch (e) {
                         this.lcdPrint("Error", 1);
+                        log("Update failed");
                     }
                     this.updating = false;
                 }, 800);
