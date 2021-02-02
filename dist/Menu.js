@@ -127,7 +127,7 @@ class Menu {
     }
     showLoadingMessage() {
         log("Loading...");
-        this.lcdPrint("Loading...", 1);
+        this.lcdPrint("Loading...".padEnd(16, " "), 1);
     }
 }
 exports.Menu = Menu;
@@ -256,7 +256,7 @@ class FontScroller {
     show() {
         this.fonts = this.fluidsynth.getFontList();
         this.index = this.fonts.indexOf(this.fluidsynth.currentSoundFont);
-        this.lcdPrint("", 1);
+        this.lcdPrint(`[${this.fluidsynth.currentSoundFont.replace(".sf2", "")}]`.padEnd(16, " "), 1);
         this.printFont();
     }
     onUp() {
