@@ -117,13 +117,18 @@ export class Menu {
   };
 }
 
+enum SystemMenuItem {
+  RESTART = 0,
+  SHUTDOWN = 1,
+  UPDATE = 2,
+  FONTS = 3,
+}
+
 class SystemMenu {
-  static RESTART = 0 as const;
-  static SHUTDOWN = 1 as const;
-  static FONTS = 2 as const;
-  private index = 0;
-  private options = ["Restart synth", "Shutdown", "Exit menu"];
+  private index: SystemMenuItem = SystemMenuItem.RESTART;
+  private options = ["Restart synth", "Shutdown", "Update Code", "Exit menu"];
   private shutdownMode = false;
+  private updating = false;
   constructor(
     private lcdPrint: (msg: string, line: number) => void,
     private fluidsynth: FluidSynth
@@ -141,7 +146,7 @@ class SystemMenu {
   }
 
   showNext() {
-    if (this.shutdownMode) {
+    if (this.shutdownMode || this.updating) {
       return;
     }
     this.index++;
@@ -152,7 +157,7 @@ class SystemMenu {
   }
 
   showPrevious() {
-    if (this.shutdownMode) {
+    if (this.shutdownMode || this.updating) {
       return;
     }
     this.index--;
@@ -163,16 +168,19 @@ class SystemMenu {
   }
 
   handlePress(setMode: (mode: MenuMode) => void) {
+    if (this.updating) {
+      return;
+    }
     switch (this.index) {
-      case SystemMenu.FONTS: {
+      case SystemMenuItem.FONTS: {
         setMode("FONTS");
         break;
       }
-      case SystemMenu.RESTART: {
+      case SystemMenuItem.RESTART: {
         this.fluidsynth.restart().then(() => setMode("FONTS"));
         break;
       }
-      case SystemMenu.SHUTDOWN: {
+      case SystemMenuItem.SHUTDOWN: {
         if (this.shutdownMode) {
           this.doShutdown();
         } else {
@@ -186,6 +194,21 @@ class SystemMenu {
         }
         break;
       }
+      case SystemMenuItem.UPDATE: {
+        this.updating = true;
+        try {
+          log(cp.execSync("git reset --hard").toString());
+          log(cp.execSync("git pull").toString());
+          this.lcdPrint("Success", 1);
+        } catch (e) {
+          this.lcdPrint("Error", 1);
+        }
+        this.updating = false;
+        break;
+      }
+      default:
+        const exhaustiveCheck: never = this.index;
+        throw new Error(`Unhandled case: ${exhaustiveCheck}`);
     }
   }
 

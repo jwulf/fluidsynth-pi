@@ -108,13 +108,21 @@ class Menu {
     }
 }
 exports.Menu = Menu;
+var SystemMenuItem;
+(function (SystemMenuItem) {
+    SystemMenuItem[SystemMenuItem["RESTART"] = 0] = "RESTART";
+    SystemMenuItem[SystemMenuItem["SHUTDOWN"] = 1] = "SHUTDOWN";
+    SystemMenuItem[SystemMenuItem["UPDATE"] = 2] = "UPDATE";
+    SystemMenuItem[SystemMenuItem["FONTS"] = 3] = "FONTS";
+})(SystemMenuItem || (SystemMenuItem = {}));
 class SystemMenu {
     constructor(lcdPrint, fluidsynth) {
         this.lcdPrint = lcdPrint;
         this.fluidsynth = fluidsynth;
-        this.index = 0;
-        this.options = ["Restart synth", "Shutdown", "Exit menu"];
+        this.index = SystemMenuItem.RESTART;
+        this.options = ["Restart synth", "Shutdown", "Update Code", "Exit menu"];
         this.shutdownMode = false;
+        this.updating = false;
     }
     displayMenu() {
         const msg = this.options[this.index].padEnd(14, " ");
@@ -126,7 +134,7 @@ class SystemMenu {
         this.displayMenu();
     }
     showNext() {
-        if (this.shutdownMode) {
+        if (this.shutdownMode || this.updating) {
             return;
         }
         this.index++;
@@ -136,7 +144,7 @@ class SystemMenu {
         this.displayMenu();
     }
     showPrevious() {
-        if (this.shutdownMode) {
+        if (this.shutdownMode || this.updating) {
             return;
         }
         this.index--;
@@ -146,16 +154,19 @@ class SystemMenu {
         this.displayMenu();
     }
     handlePress(setMode) {
+        if (this.updating) {
+            return;
+        }
         switch (this.index) {
-            case SystemMenu.FONTS: {
+            case SystemMenuItem.FONTS: {
                 setMode("FONTS");
                 break;
             }
-            case SystemMenu.RESTART: {
+            case SystemMenuItem.RESTART: {
                 this.fluidsynth.restart().then(() => setMode("FONTS"));
                 break;
             }
-            case SystemMenu.SHUTDOWN: {
+            case SystemMenuItem.SHUTDOWN: {
                 if (this.shutdownMode) {
                     this.doShutdown();
                 }
@@ -170,6 +181,22 @@ class SystemMenu {
                 }
                 break;
             }
+            case SystemMenuItem.UPDATE: {
+                this.updating = true;
+                try {
+                    log(child_process_1.default.execSync("git reset --hard").toString());
+                    log(child_process_1.default.execSync("git pull").toString());
+                    this.lcdPrint("Success", 1);
+                }
+                catch (e) {
+                    this.lcdPrint("Error", 1);
+                }
+                this.updating = false;
+                break;
+            }
+            default:
+                const exhaustiveCheck = this.index;
+                throw new Error(`Unhandled case: ${exhaustiveCheck}`);
         }
     }
     doShutdown() {
@@ -179,6 +206,3 @@ class SystemMenu {
         setTimeout(() => child_process_1.default.execSync("shutdown -h now"), 800);
     }
 }
-SystemMenu.RESTART = 0;
-SystemMenu.SHUTDOWN = 1;
-SystemMenu.FONTS = 2;
