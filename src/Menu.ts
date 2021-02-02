@@ -124,9 +124,15 @@ enum SystemMenuItem {
   FONTS = 3,
 }
 
+const SystemMenuItemLabels = [
+  "Restart synth",
+  "Update Code",
+  "Shutdown",
+  "Exit menu",
+];
+
 class SystemMenu {
   private index: SystemMenuItem = SystemMenuItem.RESTART;
-  private options = ["Restart synth", "Update Code", "Shutdown", "Exit menu"];
   private shutdownMode = false;
   private updating = false;
   constructor(
@@ -135,7 +141,7 @@ class SystemMenu {
   ) {}
 
   private displayMenu() {
-    const msg = this.options[this.index].padEnd(14, " ");
+    const msg = SystemMenuItemLabels[this.index].padEnd(14, " ");
     this.lcdPrint(`:arrowright: ${msg}`, 0);
     this.lcdPrint("", 1);
   }
@@ -151,7 +157,7 @@ class SystemMenu {
       return;
     }
     this.index++;
-    if (this.index > this.options.length - 1) {
+    if (this.index > SystemMenuItemLabels.length - 1) {
       this.index = 0;
     }
     this.displayMenu();
@@ -163,7 +169,7 @@ class SystemMenu {
     }
     this.index--;
     if (this.index < 0) {
-      this.index = this.options.length - 1;
+      this.index = SystemMenuItemLabels.length - 1;
     }
     this.displayMenu();
   }

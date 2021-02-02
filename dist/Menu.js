@@ -115,17 +115,22 @@ var SystemMenuItem;
     SystemMenuItem[SystemMenuItem["SHUTDOWN"] = 2] = "SHUTDOWN";
     SystemMenuItem[SystemMenuItem["FONTS"] = 3] = "FONTS";
 })(SystemMenuItem || (SystemMenuItem = {}));
+const SystemMenuItemLabels = [
+    "Restart synth",
+    "Update Code",
+    "Shutdown",
+    "Exit menu",
+];
 class SystemMenu {
     constructor(lcdPrint, fluidsynth) {
         this.lcdPrint = lcdPrint;
         this.fluidsynth = fluidsynth;
         this.index = SystemMenuItem.RESTART;
-        this.options = ["Restart synth", "Update Code", "Shutdown", "Exit menu"];
         this.shutdownMode = false;
         this.updating = false;
     }
     displayMenu() {
-        const msg = this.options[this.index].padEnd(14, " ");
+        const msg = SystemMenuItemLabels[this.index].padEnd(14, " ");
         this.lcdPrint(`:arrowright: ${msg}`, 0);
         this.lcdPrint("", 1);
     }
@@ -139,7 +144,7 @@ class SystemMenu {
             return;
         }
         this.index++;
-        if (this.index > this.options.length - 1) {
+        if (this.index > SystemMenuItemLabels.length - 1) {
             this.index = 0;
         }
         this.displayMenu();
@@ -150,7 +155,7 @@ class SystemMenu {
         }
         this.index--;
         if (this.index < 0) {
-            this.index = this.options.length - 1;
+            this.index = SystemMenuItemLabels.length - 1;
         }
         this.displayMenu();
     }
