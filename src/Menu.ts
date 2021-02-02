@@ -34,16 +34,22 @@ export class Menu {
         break;
       }
       case "UNSTARTED": {
-        this.fluidsynth
-          .restart()
-          .then(() => this.setFontMode())
-          .catch(() => {
-            this.lcdPrint("Failed to start", 0);
-            this.lcdPrint("", 1);
-            setTimeout(() => {
-              this.setMode("UNSTARTED");
-            }, 2000);
-          });
+        cp.execSync("init 6");
+        // Need to get hotplugging to work
+        // This is not enough:
+        // modprobe -a snd_seq_midi snd_seq_midi_event snd_seq
+        // alsactl kill rescan
+
+        // this.fluidsynth
+        //   .restart()
+        //   .then(() => this.setFontMode())
+        //   .catch(() => {
+        //     this.lcdPrint("Failed to start", 0);
+        //     this.lcdPrint("", 1);
+        //     setTimeout(() => {
+        //       this.setMode("UNSTARTED");
+        //     }, 2000);
+        //   });
         break;
       }
     }
