@@ -15,12 +15,6 @@ export class Menu {
     private lcdPrint: (msg: string, line: number) => void
   ) {
     this.systemMenu = new SystemMenu(this.lcdPrint, fluidsynth);
-    this.fluidsynth.on("fontLoading", () => {
-      log("Loading...");
-      if (this.mode === "FONTS") {
-        lcdPrint("Loading...", 1);
-      }
-    });
     this.fluidsynth.on("fontLoaded", () => {
       log("Loaded");
       if (this.mode === "FONTS") {
@@ -57,6 +51,7 @@ export class Menu {
 
   onDown = () => {
     if (this.mode === "FONTS") {
+      this.showLoadingMessage();
       this.fluidsynth
         .loadPreviousFont()
         .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
@@ -68,6 +63,7 @@ export class Menu {
 
   onUp = () => {
     if (this.mode === "FONTS") {
+      this.showLoadingMessage();
       this.fluidsynth
         .loadNextFont()
         .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
@@ -76,6 +72,11 @@ export class Menu {
       this.systemMenu.showNext();
     }
   };
+
+  private showLoadingMessage() {
+    log("Loading...");
+    this.lcdPrint("Loading...", 1);
+  }
 
   private setFontMode() {
     this.mode = "FONTS";

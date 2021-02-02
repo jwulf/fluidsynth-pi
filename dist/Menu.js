@@ -40,6 +40,7 @@ class Menu {
         };
         this.onDown = () => {
             if (this.mode === "FONTS") {
+                this.showLoadingMessage();
                 this.fluidsynth
                     .loadPreviousFont()
                     .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
@@ -50,6 +51,7 @@ class Menu {
         };
         this.onUp = () => {
             if (this.mode === "FONTS") {
+                this.showLoadingMessage();
                 this.fluidsynth
                     .loadNextFont()
                     .then(() => this.lcdPrint(this.fluidsynth.currentSoundFont, 0));
@@ -77,18 +79,16 @@ class Menu {
             }
         };
         this.systemMenu = new SystemMenu(this.lcdPrint, fluidsynth);
-        this.fluidsynth.on("fontLoading", () => {
-            log("Loading...");
-            if (this.mode === "FONTS") {
-                lcdPrint("Loading...", 1);
-            }
-        });
         this.fluidsynth.on("fontLoaded", () => {
             log("Loaded");
             if (this.mode === "FONTS") {
                 lcdPrint("", 1);
             }
         });
+    }
+    showLoadingMessage() {
+        log("Loading...");
+        this.lcdPrint("Loading...", 1);
     }
     setFontMode() {
         this.mode = "FONTS";

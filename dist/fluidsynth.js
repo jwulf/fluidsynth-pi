@@ -51,9 +51,6 @@ class FluidSynth extends events_1.EventEmitter {
                 if (message.includes("loaded SoundFont has ID")) {
                     this.emit("fontLoaded");
                 }
-                if (message.includes("load soundfonts/")) {
-                    this.emit("fontLoading");
-                }
                 if (blockForReady && message.includes(">")) {
                     blockForReady = false;
                     if (os_1.default.type() === "Linux") {
