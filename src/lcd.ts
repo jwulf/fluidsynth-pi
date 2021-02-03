@@ -37,6 +37,11 @@ export class LCD {
         cols: 20,
       });
       this.lcd.useChar("arrowright");
+      this.lcd.useChar("speaker");
+      this.lcd.useChar("retarrow");
+      this.lcd.useChar("clock");
+      this.lcd.useChar("cross");
+      this.lcd.useChar("note");
     });
   }
 

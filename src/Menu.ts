@@ -110,7 +110,7 @@ export class Menu {
 
   private showLoadingMessage() {
     log("Loading...");
-    this.lcdPrint("Loading...".padEnd(16, " "), 1);
+    this.lcdPrint(":clock: " + "Loading...".padEnd(14, " "), 1);
   }
 
   public setMode = (mode: MenuMode) => {
@@ -148,11 +148,11 @@ enum SystemMenuItem {
 }
 
 const SystemMenuItemLabels = [
-  "Choose Sound",
-  "Restart synth",
-  "Update Code",
-  "Shutdown",
-  "Exit menu",
+  { label: "Choose Sound", icon: ":note:" },
+  { label: "Restart synth", icon: ":arrowright:" },
+  { label: "Update Code", icon: ":arrowright:" },
+  { label: "Shutdown", icon: ":cross:" },
+  { label: "Exit menu", icon: ":retarrow:" },
 ];
 
 class SystemMenu {
@@ -165,8 +165,9 @@ class SystemMenu {
   ) {}
 
   private displayMenu() {
-    const msg = SystemMenuItemLabels[this.index].padEnd(14, " ");
-    this.lcdPrint(`:arrowright: ${msg}`, 0);
+    const menuItem = SystemMenuItemLabels[this.index];
+    const msg = menuItem.label.padEnd(14, " ");
+    this.lcdPrint(`${menuItem.icon} ${msg}`, 0);
     this.lcdPrint("", 1);
   }
 
@@ -303,7 +304,10 @@ class FontScroller {
   }
 
   private printFont() {
-    const msg = this.fonts[this.index].replace(".sf2", "").padEnd(14, " ");
-    this.lcdPrint(`:arrowright: ${msg}`, 0);
+    const font = this.fonts[this.index];
+    const msg = font.replace(".sf2", "").padEnd(14, " ");
+    const char =
+      this.fluidsynth.currentSoundFont === font ? ":speaker:" : ":arrowright:";
+    this.lcdPrint(`${char} ${msg}`, 0);
   }
 }
