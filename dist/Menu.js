@@ -127,7 +127,7 @@ class Menu {
     }
     showLoadingMessage() {
         log("Loading...");
-        this.lcdPrint(":clock: " + "Loading...".padEnd(14, " "), 1);
+        this.lcdPrint(":circle: " + "Loading...".padEnd(14, " "), 1);
     }
 }
 exports.Menu = Menu;
@@ -140,10 +140,10 @@ var SystemMenuItem;
     SystemMenuItem[SystemMenuItem["EXIT"] = 4] = "EXIT";
 })(SystemMenuItem || (SystemMenuItem = {}));
 const SystemMenuItemLabels = [
-    { label: "Choose Sound", icon: ":note:" },
+    { label: "Choose Sound", icon: ":arrowright:" },
     { label: "Restart synth", icon: ":arrowright:" },
     { label: "Update Code", icon: ":arrowright:" },
-    { label: "Shutdown", icon: ":cross:" },
+    { label: "Shutdown", icon: ":arrowright:" },
     { label: "Exit menu", icon: ":retarrow:" },
 ];
 class SystemMenu {

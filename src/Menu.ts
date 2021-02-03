@@ -110,7 +110,7 @@ export class Menu {
 
   private showLoadingMessage() {
     log("Loading...");
-    this.lcdPrint(":clock: " + "Loading...".padEnd(14, " "), 1);
+    this.lcdPrint(":circle: " + "Loading...".padEnd(14, " "), 1);
   }
 
   public setMode = (mode: MenuMode) => {
@@ -148,10 +148,10 @@ enum SystemMenuItem {
 }
 
 const SystemMenuItemLabels = [
-  { label: "Choose Sound", icon: ":note:" },
+  { label: "Choose Sound", icon: ":arrowright:" },
   { label: "Restart synth", icon: ":arrowright:" },
   { label: "Update Code", icon: ":arrowright:" },
-  { label: "Shutdown", icon: ":cross:" },
+  { label: "Shutdown", icon: ":arrowright:" },
   { label: "Exit menu", icon: ":retarrow:" },
 ];
 
