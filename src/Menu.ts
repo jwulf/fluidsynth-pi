@@ -159,6 +159,7 @@ class SystemMenu {
   private index: SystemMenuItem = SystemMenuItem.RESTART;
   private shutdownMode = false;
   private updating = false;
+  private shutdownTimer: NodeJS.Timeout | undefined;
   constructor(
     private lcdPrint: (msg: string, line: number) => void,
     private fluidsynth: FluidSynth
@@ -218,11 +219,12 @@ class SystemMenu {
       }
       case SystemMenuItem.SHUTDOWN: {
         if (this.shutdownMode) {
+          clearTimeout(this.shutdownTimer!);
           this.doShutdown();
         } else {
           this.lcdPrint("Confirm shutdown?", 1);
           this.shutdownMode = true;
-          setTimeout(() => {
+          this.shutdownTimer = setTimeout(() => {
             this.shutdownMode = false;
             this.lcdPrint("", 1);
             this.displayMenu();

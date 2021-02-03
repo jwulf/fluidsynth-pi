@@ -204,12 +204,13 @@ class SystemMenu {
             }
             case SystemMenuItem.SHUTDOWN: {
                 if (this.shutdownMode) {
+                    clearTimeout(this.shutdownTimer);
                     this.doShutdown();
                 }
                 else {
                     this.lcdPrint("Confirm shutdown?", 1);
                     this.shutdownMode = true;
-                    setTimeout(() => {
+                    this.shutdownTimer = setTimeout(() => {
                         this.shutdownMode = false;
                         this.lcdPrint("", 1);
                         this.displayMenu();
