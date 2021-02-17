@@ -20,20 +20,19 @@ const ringlog_1 = require("./ringlog");
 const SoundFontLibrary_1 = require("./SoundFontLibrary");
 const events_1 = require("events");
 const priority = process.env.FLUIDSYNTH_PRIORITY || "0";
+const defaultFluidsynthArgs = "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os_1.default.type() === "Linux"
+    ? " --audio-driver=alsa"
+    : "";
+const argsFromEnv = process.env.FLUIDSYNTH_ARGS;
+const fluidsynthArgs = argsFromEnv || defaultFluidsynthArgs;
+const aconnectArgs = process.env.ACONNECT_ARGS || "16:0 128:0";
 class FluidSynth extends events_1.EventEmitter {
     constructor(lcdPrint, onSuccess, onError) {
         super();
         this.lcdPrint = lcdPrint;
         this.log = ringlog_1.Log(chalk_1.default.green);
         this.loadedFontCount = 0;
-        const defaultFluidsynthArgs = "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os_1.default.type() ===
-            "Linux"
-            ? " --audio-driver=alsa"
-            : "";
-        const argsFromEnv = process.env.FLUIDSYNTH_ARGS;
-        this.fluidsynthArgs = argsFromEnv || defaultFluidsynthArgs;
-        this.aconnectArgs = process.env.ACONNECT_ARGS || "16:0 128:0";
-        this.log(`FluidSynth args: ${this.fluidsynthArgs}`);
+        this.log(`FluidSynth args: ${fluidsynthArgs}`);
         lcdPrint("Starting...", 0);
         this.errorlog = ringlog_1.Log(chalk_1.default.redBright);
         this.soundFontLibrary = new SoundFontLibrary_1.SoundFontLibrary();
@@ -49,7 +48,7 @@ class FluidSynth extends events_1.EventEmitter {
                 "-n",
                 priority,
                 "fluidsynth",
-                ...this.fluidsynthArgs.split(" "),
+                ...fluidsynthArgs.split(" "),
             ]);
             this.process.stderr.on("data", (error) => {
                 this.errorlog(error.toString());
@@ -67,7 +66,7 @@ class FluidSynth extends events_1.EventEmitter {
                     blockForReady = false;
                     if (os_1.default.type() === "Linux") {
                         try {
-                            child_process_1.default.execSync(`aconnect ${this.aconnectArgs}`);
+                            child_process_1.default.execSync(`aconnect ${aconnectArgs}`);
                         }
                         catch (e) {
                             return reject(e);

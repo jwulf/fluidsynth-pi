@@ -7,6 +7,14 @@ import { EventEmitter } from "events";
 
 const priority = process.env.FLUIDSYNTH_PRIORITY || "0";
 
+const defaultFluidsynthArgs =
+  "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os.type() === "Linux"
+    ? " --audio-driver=alsa"
+    : "";
+const argsFromEnv = process.env.FLUIDSYNTH_ARGS;
+const fluidsynthArgs = argsFromEnv || defaultFluidsynthArgs;
+const aconnectArgs = process.env.ACONNECT_ARGS || "16:0 128:0";
+
 export class FluidSynth extends EventEmitter {
   ready: Promise<unknown>;
   currentSoundFont!: string;
@@ -15,8 +23,6 @@ export class FluidSynth extends EventEmitter {
   private errorlog: (msg: string) => void;
   private loadedFontCount = 0;
   private process!: cp.ChildProcessWithoutNullStreams;
-  private fluidsynthArgs: string;
-  private aconnectArgs: string;
 
   constructor(
     private lcdPrint: (msg: string, line: number) => void,
@@ -24,16 +30,8 @@ export class FluidSynth extends EventEmitter {
     onError: (error: string) => void
   ) {
     super();
-    const defaultFluidsynthArgs =
-      "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os.type() ===
-      "Linux"
-        ? " --audio-driver=alsa"
-        : "";
-    const argsFromEnv = process.env.FLUIDSYNTH_ARGS;
-    this.fluidsynthArgs = argsFromEnv || defaultFluidsynthArgs;
-    this.aconnectArgs = process.env.ACONNECT_ARGS || "16:0 128:0";
 
-    this.log(`FluidSynth args: ${this.fluidsynthArgs}`);
+    this.log(`FluidSynth args: ${fluidsynthArgs}`);
     lcdPrint("Starting...", 0);
     this.errorlog = Log(chalk.redBright);
     this.soundFontLibrary = new SoundFontLibrary();
@@ -51,7 +49,7 @@ export class FluidSynth extends EventEmitter {
         "-n",
         priority,
         "fluidsynth",
-        ...this.fluidsynthArgs.split(" "),
+        ...fluidsynthArgs.split(" "),
       ]);
       this.process.stderr.on("data", (error) => {
         this.errorlog(error.toString());
@@ -69,7 +67,7 @@ export class FluidSynth extends EventEmitter {
           blockForReady = false;
           if (os.type() === "Linux") {
             try {
-              cp.execSync(`aconnect ${this.aconnectArgs}`);
+              cp.execSync(`aconnect ${aconnectArgs}`);
             } catch (e) {
               return reject(e);
             }

@@ -1,55 +1,67 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { FluidSynth } from "./fluidsynth";
-import chalk from "chalk";
-import { Log } from "./ringlog";
-import { LCD } from "./lcd";
-import { Dial } from "./dial";
-import { Menu } from "./Menu";
-import { startWebInterface } from "./web-ui";
+// import { startWebInterface } from "./web-ui";
+import { start, dispatch } from "nact";
+import {
+  LcdController,
+  LcdControllerActorMessages,
+} from "./LcdControllerActor";
+import {
+  MenuController,
+  MenuControllerActorMessages,
+} from "./MenuControllerActor";
+import { createDial } from "./DialControllerActor";
+import { Fluidsynth } from "./FluidSynthActor";
+import { SoundFontLibrary } from "./SoundFontLibraryActor";
+import { FavoriteMenu } from "./MenuFavorites";
+import { FontExplorerMenu } from "./MenuFontExplorer";
 
-const log = Log(chalk.yellowBright);
-
-const lcdEnabled = (process.env.ENABLE_LCD || "false").toLowerCase() === "true";
-const lcd = lcdEnabled ? new LCD() : null;
-
-log(`LCD ${lcdEnabled ? "enabled" : "disabled"}`);
-
-const lcdPrint = (msg: string, line: number) => {
-  if (lcd) {
-    return lcd.print((msg || "").replace(".sf2", "").padEnd(16, " "), line);
-  }
-};
-lcdPrint("Starting...", 0);
-
-process.on("exit", (code) => {
-  lcdPrint("Stopped...", 0);
-  lcdPrint("", 1);
+const system = start();
+export const lcdController = LcdController(system);
+dispatch(lcdController, {
+  type: LcdControllerActorMessages.PRINT,
+  text: "Starting...",
+  line: 0,
 });
 
-const fluidsynth: FluidSynth = new FluidSynth(
-  lcdPrint,
-  () => menu?.setMode("FONTS"),
-  () => menu?.setMode("UNSTARTED")
-);
-const menu = new Menu(fluidsynth, lcdPrint);
+export const soundFontLibrary = SoundFontLibrary(system);
+export const menuController = MenuController(system);
+const favoritesMenu = FavoriteMenu(system);
+export const fontExplorerMenu = FontExplorerMenu(system);
+dispatch(menuController, {
+  type: MenuControllerActorMessages.ADD_MENU,
+  menu: favoritesMenu,
+  name: "FAVORITES",
+});
+dispatch(menuController, {
+  type: MenuControllerActorMessages.ACTIVATE_MENU,
+  menu: "FAVORITES",
+});
 
-/**
- * Rotary Dial
- */
-const __dial = lcdEnabled
-  ? new Dial({
-      onDown: () => menu.onDown(),
-      onPress: () => menu.onPress(),
-      onUp: () => menu.onUp(),
-    })
-  : null;
+export const fluidSynth = Fluidsynth(system);
+// @TODO: load default font
+createDial(menuController);
 
-const webUIEnabled =
-  (process.env.WEBUI_ENABLED || "true").toLowerCase() !== "false";
+process.on("exit", () => {
+  dispatch(lcdController, {
+    type: LcdControllerActorMessages.PRINT,
+    text: "Stopped...",
+    line: 0,
+  });
+  dispatch(lcdController, {
+    type: LcdControllerActorMessages.PRINT,
+    text: "",
+    line: 1,
+  });
+});
 
-log(`Web UI: ${webUIEnabled ? "enabled" : "disabled"}`);
-if (webUIEnabled) {
-  startWebInterface(fluidsynth, menu);
-}
+// Disable web interface during refactor
+
+// const webUIEnabled =
+//   (process.env.WEBUI_ENABLED || "true").toLowerCase() !== "false";
+
+// log(`Web UI: ${webUIEnabled ? "enabled" : "disabled"}`);
+// if (webUIEnabled) {
+//   startWebInterface(fluidsynth, menu);
+// }

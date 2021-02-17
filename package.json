@@ -13,14 +13,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/uuid": "^8.3.0",
     "body-parser": "^1.19.0",
     "chalk": "^4.1.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.1",
     "johnny-five": "^2.0.0",
+    "nact": "^7.6.0",
     "raspi-io": "^11.0.0",
-    "socket.io": "^3.1.0"
+    "socket.io": "^3.1.0",
+    "soundfont2": "^0.3.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
