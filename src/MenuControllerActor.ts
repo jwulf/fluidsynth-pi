@@ -2,8 +2,11 @@ import { ActorSystemRef, dispatch, Ref, spawn } from "nact";
 import { DialInteractionEventMessage } from "./ActorConstants";
 import { FavoriteMenu } from "./MenuFavorites";
 import { FontExplorerMenu } from "./MenuFontExplorer";
+import { Log } from "./ringlog";
 
 type MenuList = "FAVORITES" | "EXPLORER";
+
+const log = Log();
 
 interface MenuControllerActorState {
   activeMenu: ActorSystemRef | undefined;
@@ -57,24 +60,29 @@ export const MenuController = (root: any): Ref<Message> => {
         }
         return state;
       }
-      if (msg.type === MenuControllerActorMessages.ACTIVATE_MENU) {
-        const activeMenu = ctx.children.get(msg.menuName)!;
+
+      const activateMenu = (
+        state: MenuControllerActorState,
+        msg: ActivateMenuMessage | ActiveThisMenuMessage,
+        activeMenu: Ref<any>
+      ) => {
         dispatch(activeMenu, {
           type: MenuControllerActorMessages.ACTIVATE_MENU,
           state: msg.state,
         });
+        log(`Activating menu ${(msg as any).name || (msg as any).menuName}`);
         return { ...state, activeMenu };
+      };
+      if (msg.type === MenuControllerActorMessages.ACTIVATE_MENU) {
+        const activeMenu = ctx.children.get(msg.menuName)!;
+        return activateMenu(state, msg, activeMenu);
       }
       if (msg.type === MenuControllerActorMessages.ACTIVATE_THIS_MENU) {
         const { menu, name, state } = msg;
         const activeMenu = ctx.children.has(name)
           ? ctx.children.get(name)
           : menu(ctx.self, name);
-        dispatch(activeMenu!, {
-          type: MenuControllerActorMessages.ACTIVATE_MENU,
-          state,
-        });
-        return { ...state, activeMenu };
+        return activateMenu(state, msg, activeMenu!);
       }
     }
   );

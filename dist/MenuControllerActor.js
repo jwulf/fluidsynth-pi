@@ -4,6 +4,8 @@ exports.MenuController = exports.MenuControllerActorMessages = void 0;
 const nact_1 = require("nact");
 const MenuFavorites_1 = require("./MenuFavorites");
 const MenuFontExplorer_1 = require("./MenuFontExplorer");
+const ringlog_1 = require("./ringlog");
+const log = ringlog_1.Log();
 var MenuControllerActorMessages;
 (function (MenuControllerActorMessages) {
     MenuControllerActorMessages["ACTIVATE_MENU"] = "ACTIVATE_MENU";
@@ -21,24 +23,24 @@ const MenuController = (root) => {
             }
             return state;
         }
-        if (msg.type === MenuControllerActorMessages.ACTIVATE_MENU) {
-            const activeMenu = ctx.children.get(msg.menuName);
+        const activateMenu = (state, msg, activeMenu) => {
             nact_1.dispatch(activeMenu, {
                 type: MenuControllerActorMessages.ACTIVATE_MENU,
                 state: msg.state,
             });
+            log(`Activating menu ${msg.name || msg.menuName}`);
             return Object.assign(Object.assign({}, state), { activeMenu });
+        };
+        if (msg.type === MenuControllerActorMessages.ACTIVATE_MENU) {
+            const activeMenu = ctx.children.get(msg.menuName);
+            return activateMenu(state, msg, activeMenu);
         }
         if (msg.type === MenuControllerActorMessages.ACTIVATE_THIS_MENU) {
             const { menu, name, state } = msg;
             const activeMenu = ctx.children.has(name)
                 ? ctx.children.get(name)
                 : menu(ctx.self, name);
-            nact_1.dispatch(activeMenu, {
-                type: MenuControllerActorMessages.ACTIVATE_MENU,
-                state,
-            });
-            return Object.assign(Object.assign({}, state), { activeMenu });
+            return activateMenu(state, msg, activeMenu);
         }
     });
     MenuFavorites_1.FavoriteMenu(menuController);

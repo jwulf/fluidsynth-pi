@@ -14,8 +14,6 @@ import {
 import { createDial } from "./DialControllerActor";
 import { Fluidsynth } from "./FluidSynthActor";
 import { SoundFontLibrary } from "./SoundFontLibraryActor";
-import { FavoriteMenu } from "./MenuFavorites";
-import { FontExplorerMenu } from "./MenuFontExplorer";
 
 const system = start();
 export const lcdController = LcdController(system);
