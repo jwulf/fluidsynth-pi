@@ -31,41 +31,43 @@ function loadFont(entry) {
         entry,
     }), 10000);
 }
-const FavoriteMenu = (root) => nact_1.spawn(root, (state = {}, msg, ctx) => __awaiter(void 0, void 0, void 0, function* () {
-    if (msg.type === MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_MENU) {
-        const cursor = state.cursor || (yield getFavoritesCursor());
-        MenuUtils_1.updateDisplay(main_1.lcdController, MenuUtils_1.makeDisplayName(state.scrolling, cursor));
-        return Object.assign(Object.assign({}, state), { cursor });
-    }
-    if (msg.type === ActorConstants_1.DIAL_INTERACTION_EVENT) {
-        if (msg.event_type === ActorConstants_1.DialInteractionEvent.BUTTON_PRESSED) {
-            if (state.scrolling) {
-                // Button pressed on an item that isn't selected
-                if (state.cursor.item === null) {
-                    return state;
-                }
-                const fontLoadResult = yield loadFont(state.cursor.item);
-                if (fontLoadResult.result === ActorConstants_1.OPERATION_SUCCESS) {
-                    return Object.assign(Object.assign({}, state), { scrolling: false, currentlySelected: state.cursor.item });
+const FavoriteMenu = (root) => {
+    nact_1.spawn(root, (state = {}, msg, ctx) => __awaiter(void 0, void 0, void 0, function* () {
+        state.cursor = state.cursor || (yield getFavoritesCursor());
+        if (msg.type === MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_MENU) {
+            MenuUtils_1.updateDisplay(main_1.lcdController, MenuUtils_1.makeDisplayName(state.scrolling, state.cursor));
+            return Object.assign({}, state);
+        }
+        if (msg.type === ActorConstants_1.DIAL_INTERACTION_EVENT) {
+            if (msg.event_type === ActorConstants_1.DialInteractionEvent.BUTTON_PRESSED) {
+                if (state.scrolling) {
+                    // Button pressed on an item that isn't selected
+                    if (state.cursor.item === null) {
+                        return state;
+                    }
+                    const fontLoadResult = yield loadFont(state.cursor.item);
+                    if (fontLoadResult.result === ActorConstants_1.OPERATION_SUCCESS) {
+                        return Object.assign(Object.assign({}, state), { scrolling: false, currentlySelected: state.cursor.item });
+                    }
+                    else {
+                        nact_1.dispatch(main_1.lcdController, {
+                            type: LcdControllerActor_1.LcdControllerActorMessages.SHOW_TOAST,
+                            text: "Error",
+                            durationMs: 2000,
+                            id: "FAVORITE_LOAD_FAILURE",
+                        });
+                        return state;
+                    }
                 }
                 else {
-                    nact_1.dispatch(main_1.lcdController, {
-                        type: LcdControllerActor_1.LcdControllerActorMessages.SHOW_TOAST,
-                        text: "Error",
-                        durationMs: 2000,
-                        id: "FAVORITE_LOAD_FAILURE",
-                    });
-                    return state;
+                    // Button pressed, not scrolling - invoke further menu
                 }
             }
             else {
-                // Button pressed, not scrolling - invoke further menu
+                // Move up or down
+                return Object.assign(Object.assign({}, state), { scrolling: MenuUtils_1.moveCursor(msg, state) });
             }
         }
-        else {
-            // Move up or down
-            return Object.assign(Object.assign({}, state), { scrolling: MenuUtils_1.moveCursor(msg, state) });
-        }
-    }
-}), ActorConstants_1.Actor.MenuFavorites);
+    }), ActorConstants_1.Actor.MenuFavorites);
+};
 exports.FavoriteMenu = FavoriteMenu;

@@ -58,7 +58,7 @@ function loadFont<T>(entry: CollectionItem<Favorite>) {
   );
 }
 
-export const FavoriteMenu = (root: ActorSystemRef) =>
+export const FavoriteMenu = (root: ActorSystemRef) => {
   spawn(
     root,
     async (
@@ -66,10 +66,10 @@ export const FavoriteMenu = (root: ActorSystemRef) =>
       msg: FavoritesMessage,
       ctx
     ) => {
+      state.cursor = state.cursor || await getFavoritesCursor()
       if (msg.type === MenuControllerActorMessages.ACTIVATE_MENU) {
-        const cursor = state.cursor || (await getFavoritesCursor());
-        updateDisplay(lcdController, makeDisplayName(state.scrolling, cursor));
-        return { ...state, cursor };
+        updateDisplay(lcdController, makeDisplayName(state.scrolling, state.cursor));
+        return { ...state };
       }
       if (msg.type === DIAL_INTERACTION_EVENT) {
         if (msg.event_type === DialInteractionEvent.BUTTON_PRESSED) {

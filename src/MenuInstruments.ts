@@ -15,7 +15,7 @@ import { makeDisplayName, moveCursor, updateDisplay } from "./MenuUtils";
 import { Favorite } from "./SoundFontLibraryActor";
 import path from "path";
 import * as fs from "fs";
-import { Instrument, Preset, SoundFont2 } from "soundfont2";
+import { SoundFont2 } from "soundfont2";
 import { FluidSynthMessageType } from "./FluidSynthActor";
 
 type InstrumentsState = {
