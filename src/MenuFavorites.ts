@@ -7,7 +7,13 @@ import {
   OperationResult,
   OPERATION_SUCCESS,
 } from "./ActorConstants";
-import { fluidSynth, lcdController, soundFontLibrary } from "./main";
+import {
+  fluidSynth,
+  fontExplorerMenu,
+  lcdController,
+  menuController,
+  soundFontLibrary,
+} from "./main";
 import {
   Favorite,
   SoundFontFile,
@@ -58,17 +64,20 @@ function loadFont<T>(entry: CollectionItem<Favorite>) {
   );
 }
 
-export const FavoriteMenu = (root: ActorSystemRef) => {
+export const FavoriteMenu = (root: ActorSystemRef) =>
   spawn(
     root,
     async (
-      state: FavoritesState = {} as FavoritesState,
+      state: FavoritesState = { scrolling: false } as FavoritesState,
       msg: FavoritesMessage,
       ctx
     ) => {
-      state.cursor = state.cursor || await getFavoritesCursor()
+      state.cursor = state.cursor || (await getFavoritesCursor());
       if (msg.type === MenuControllerActorMessages.ACTIVATE_MENU) {
-        updateDisplay(lcdController, makeDisplayName(state.scrolling, state.cursor));
+        updateDisplay(
+          lcdController,
+          makeDisplayName(state.scrolling, state.cursor)
+        );
         return { ...state };
       }
       if (msg.type === DIAL_INTERACTION_EVENT) {
@@ -96,6 +105,11 @@ export const FavoriteMenu = (root: ActorSystemRef) => {
             }
           } else {
             // Button pressed, not scrolling - invoke further menu
+            dispatch(menuController, {
+              type: MenuControllerActorMessages.ACTIVATE_MENU,
+              menu: fontExplorerMenu,
+            });
+            return state;
           }
         } else {
           // Move up or down
