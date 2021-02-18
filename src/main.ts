@@ -27,16 +27,11 @@ dispatch(lcdController, {
 
 export const soundFontLibrary = SoundFontLibrary(system);
 export const menuController = MenuController(system);
-const favoritesMenu = FavoriteMenu(system);
-export const fontExplorerMenu = FontExplorerMenu(system);
-dispatch(menuController, {
-  type: MenuControllerActorMessages.ADD_MENU,
-  menu: favoritesMenu,
-  name: "FAVORITES",
-});
+
 dispatch(menuController, {
   type: MenuControllerActorMessages.ACTIVATE_MENU,
-  menu: "FAVORITES",
+  menuName: "FAVORITES",
+  state: {},
 });
 
 export const fluidSynth = Fluidsynth(system);

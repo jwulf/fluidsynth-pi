@@ -42,9 +42,9 @@ function loadSoundfont(filename: string): Favorite[] {
     return [] as Favorite[];
   }
 }
-export const InstrumentMenu = async (
+export const InstrumentMenu = (filename: string) => async (
   parent: ActorSystemRef,
-  filename: string
+  name: string
 ) => {
   const sf = loadSoundfont(filename);
   const collection = new Collection(sf);
@@ -96,6 +96,6 @@ export const InstrumentMenu = async (
         }
       }
     },
-    filename
+    name
   );
 };

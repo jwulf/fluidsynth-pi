@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fluidSynth = exports.fontExplorerMenu = exports.menuController = exports.soundFontLibrary = exports.lcdController = void 0;
+exports.fluidSynth = exports.menuController = exports.soundFontLibrary = exports.lcdController = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 // import { startWebInterface } from "./web-ui";
@@ -13,8 +13,6 @@ const MenuControllerActor_1 = require("./MenuControllerActor");
 const DialControllerActor_1 = require("./DialControllerActor");
 const FluidSynthActor_1 = require("./FluidSynthActor");
 const SoundFontLibraryActor_1 = require("./SoundFontLibraryActor");
-const MenuFavorites_1 = require("./MenuFavorites");
-const MenuFontExplorer_1 = require("./MenuFontExplorer");
 const system = nact_1.start();
 exports.lcdController = LcdControllerActor_1.LcdController(system);
 nact_1.dispatch(exports.lcdController, {
@@ -24,16 +22,10 @@ nact_1.dispatch(exports.lcdController, {
 });
 exports.soundFontLibrary = SoundFontLibraryActor_1.SoundFontLibrary(system);
 exports.menuController = MenuControllerActor_1.MenuController(system);
-const favoritesMenu = MenuFavorites_1.FavoriteMenu(system);
-exports.fontExplorerMenu = MenuFontExplorer_1.FontExplorerMenu(system);
-nact_1.dispatch(exports.menuController, {
-    type: MenuControllerActor_1.MenuControllerActorMessages.ADD_MENU,
-    menu: favoritesMenu,
-    name: "FAVORITES",
-});
 nact_1.dispatch(exports.menuController, {
     type: MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_MENU,
-    menu: "FAVORITES",
+    menuName: "FAVORITES",
+    state: {},
 });
 exports.fluidSynth = FluidSynthActor_1.Fluidsynth(system);
 // @TODO: load default font

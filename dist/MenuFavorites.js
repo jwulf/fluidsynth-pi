@@ -62,7 +62,8 @@ const FavoriteMenu = (root) => nact_1.spawn(root, (state = { scrolling: false },
                 // Button pressed, not scrolling - invoke further menu
                 nact_1.dispatch(main_1.menuController, {
                     type: MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_MENU,
-                    menu: main_1.fontExplorerMenu,
+                    menuName: "EXPLORER",
+                    state: {},
                 });
                 return state;
             }
@@ -72,5 +73,5 @@ const FavoriteMenu = (root) => nact_1.spawn(root, (state = { scrolling: false },
             return Object.assign(Object.assign({}, state), { scrolling: MenuUtils_1.moveCursor(msg, state) });
         }
     }
-}), ActorConstants_1.Actor.MenuFavorites);
+}), "FAVORITES");
 exports.FavoriteMenu = FavoriteMenu;

@@ -4,12 +4,7 @@ import {
   DialInteractionEventMessage,
   DIAL_INTERACTION_EVENT,
 } from "./ActorConstants";
-import {
-  fontExplorerMenu,
-  lcdController,
-  menuController,
-  soundFontLibrary,
-} from "./main";
+import { lcdController, menuController, soundFontLibrary } from "./main";
 import {
   Favorite,
   SoundFontFile,
@@ -61,19 +56,19 @@ export const FontExplorerMenu = (root: ActorSystemRef) =>
       if (msg.type === DIAL_INTERACTION_EVENT) {
         if (msg.event_type === DialInteractionEvent.BUTTON_PRESSED) {
           const currentFont = state.cursor.item?.filename;
-          let instruments =
-            currentFont !== undefined && ctx.children.has(currentFont)
-              ? ctx.children.get(currentFont)
-              : await InstrumentMenu(fontExplorerMenu, currentFont!);
+          if (currentFont === undefined) {
+            return state;
+          }
           dispatch(menuController, {
-            type: MenuControllerActorMessages.ACTIVATE_MENU,
+            type: MenuControllerActorMessages.ACTIVATE_THIS_MENU,
             state: { font: state.cursor.item },
-            menu: instruments,
+            menu: InstrumentMenu(currentFont),
+            name: `EXPLORER-${currentFont}`,
           });
         } else {
           return { ...state, scrolling: moveCursor(msg, state) };
         }
       }
     },
-    "FontExplorer"
+    "EXPLORER"
   );

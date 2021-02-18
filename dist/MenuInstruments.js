@@ -60,7 +60,7 @@ function loadSoundfont(filename) {
         return [];
     }
 }
-const InstrumentMenu = (parent, filename) => __awaiter(void 0, void 0, void 0, function* () {
+const InstrumentMenu = (filename) => (parent, name) => __awaiter(void 0, void 0, void 0, function* () {
     const sf = loadSoundfont(filename);
     const collection = new Collection_1.Collection(sf);
     const cursor = collection.createCursor();
@@ -97,6 +97,6 @@ const InstrumentMenu = (parent, filename) => __awaiter(void 0, void 0, void 0, f
                 return Object.assign(Object.assign({}, state), { currentlySelected: state.cursor.item });
             }
         }
-    }), filename);
+    }), name);
 });
 exports.InstrumentMenu = InstrumentMenu;

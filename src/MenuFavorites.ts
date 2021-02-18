@@ -9,7 +9,6 @@ import {
 } from "./ActorConstants";
 import {
   fluidSynth,
-  fontExplorerMenu,
   lcdController,
   menuController,
   soundFontLibrary,
@@ -107,7 +106,8 @@ export const FavoriteMenu = (root: ActorSystemRef) =>
             // Button pressed, not scrolling - invoke further menu
             dispatch(menuController, {
               type: MenuControllerActorMessages.ACTIVATE_MENU,
-              menu: fontExplorerMenu,
+              menuName: "EXPLORER",
+              state: {},
             });
             return state;
           }
@@ -117,5 +117,5 @@ export const FavoriteMenu = (root: ActorSystemRef) =>
         }
       }
     },
-    Actor.MenuFavorites
+    "FAVORITES"
   );

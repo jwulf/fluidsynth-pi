@@ -33,18 +33,19 @@ const FontExplorerMenu = (root) => nact_1.spawn(root, (state = { scrolling: fals
     if (msg.type === ActorConstants_1.DIAL_INTERACTION_EVENT) {
         if (msg.event_type === ActorConstants_1.DialInteractionEvent.BUTTON_PRESSED) {
             const currentFont = (_a = state.cursor.item) === null || _a === void 0 ? void 0 : _a.filename;
-            let instruments = currentFont !== undefined && ctx.children.has(currentFont)
-                ? ctx.children.get(currentFont)
-                : yield MenuInstruments_1.InstrumentMenu(main_1.fontExplorerMenu, currentFont);
+            if (currentFont === undefined) {
+                return state;
+            }
             nact_1.dispatch(main_1.menuController, {
-                type: MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_MENU,
+                type: MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_THIS_MENU,
                 state: { font: state.cursor.item },
-                menu: instruments,
+                menu: MenuInstruments_1.InstrumentMenu(currentFont),
+                name: `EXPLORER-${currentFont}`,
             });
         }
         else {
             return Object.assign(Object.assign({}, state), { scrolling: MenuUtils_1.moveCursor(msg, state) });
         }
     }
-}), "FontExplorer");
+}), "EXPLORER");
 exports.FontExplorerMenu = FontExplorerMenu;
