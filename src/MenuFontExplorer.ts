@@ -55,6 +55,9 @@ export const FontExplorerMenu = (root: ActorSystemRef) =>
       }
       if (msg.type === DIAL_INTERACTION_EVENT) {
         if (msg.event_type === DialInteractionEvent.BUTTON_PRESSED) {
+          // tslint:disable-next-line: no-console
+          console.log(state.cursor.item); // @DEBUG
+
           const currentFont = state.cursor.item?.filename;
           if (currentFont === undefined) {
             return state;
@@ -63,7 +66,7 @@ export const FontExplorerMenu = (root: ActorSystemRef) =>
             type: MenuControllerActorMessages.ACTIVATE_THIS_MENU,
             state: { font: state.cursor.item },
             menu: InstrumentMenu(currentFont),
-            name: `EXPLORER-${currentFont}`,
+            name: `INSTRUMENT-${currentFont}`,
           });
         } else {
           return { ...state, scrolling: moveCursor(msg, state) };

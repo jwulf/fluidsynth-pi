@@ -32,6 +32,8 @@ const FontExplorerMenu = (root) => nact_1.spawn(root, (state = { scrolling: fals
     }
     if (msg.type === ActorConstants_1.DIAL_INTERACTION_EVENT) {
         if (msg.event_type === ActorConstants_1.DialInteractionEvent.BUTTON_PRESSED) {
+            // tslint:disable-next-line: no-console
+            console.log(state.cursor.item); // @DEBUG
             const currentFont = (_a = state.cursor.item) === null || _a === void 0 ? void 0 : _a.filename;
             if (currentFont === undefined) {
                 return state;
@@ -40,7 +42,7 @@ const FontExplorerMenu = (root) => nact_1.spawn(root, (state = { scrolling: fals
                 type: MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_THIS_MENU,
                 state: { font: state.cursor.item },
                 menu: MenuInstruments_1.InstrumentMenu(currentFont),
-                name: `EXPLORER-${currentFont}`,
+                name: `INSTRUMENT-${currentFont}`,
             });
         }
         else {
