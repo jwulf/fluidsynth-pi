@@ -2,6 +2,8 @@ import five from "johnny-five";
 import { board } from "./board";
 const delay = parseInt(process.env.ROTARY_DELAY || "500", 10);
 
+let cycle: "DOWN" | "PRESS" | "HOLD" | "UP" = "DOWN";
+
 function rotaryEncoder({
   aPin,
   bPin,
@@ -9,6 +11,7 @@ function rotaryEncoder({
   onUp,
   onDown,
   onPress,
+  onHold,
 }: {
   aPin: five.Pin;
   bPin: five.Pin;
@@ -16,6 +19,7 @@ function rotaryEncoder({
   onUp: () => void;
   onDown: () => void;
   onPress: () => void;
+  onHold: () => void;
 }) {
   // https://gist.github.com/rwaldron/5db750527f257636c5d3b2c492737c99
   let value = 0;
@@ -78,7 +82,18 @@ function rotaryEncoder({
 
   bPin.on("change", handler);
   aPin.on("change", handler);
-  pressButton.on("up", () => onPress());
+  pressButton.on("down", () => (cycle = "DOWN"));
+  pressButton.on("press", () => (cycle = "PRESS"));
+  pressButton.on("hold", () => (cycle = "HOLD"));
+
+  pressButton.on("up", () => {
+    // It cycles "DOWN" -> "PRESS" -> ["HOLD"] -> "UP"
+    if (cycle === "PRESS") {
+      onPress();
+    } else {
+      onHold();
+    }
+  });
 }
 
 type Handler = () => void;
@@ -89,10 +104,12 @@ export class Dial {
     onDown,
     onPress,
     onUp,
+    onHold,
   }: {
     onPress: Handler;
     onUp: Handler;
     onDown: Handler;
+    onHold: Handler;
   }) {
     board().ready.then(() => {
       const aPin = new five.Pin({
@@ -125,6 +142,10 @@ export class Dial {
         onPress: () => {
           console.log("press");
           onPress();
+        },
+        onHold: () => {
+          console.log("hold");
+          onHold();
         },
       });
     });

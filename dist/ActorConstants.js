@@ -16,6 +16,7 @@ var DialInteractionEvent;
     DialInteractionEvent["BUTTON_PRESSED"] = "BUTTON_PRESSED";
     DialInteractionEvent["GO_UP"] = "GO_UP";
     DialInteractionEvent["GO_DOWN"] = "GO_DOWN";
+    DialInteractionEvent["BUTTON_LONG_PRESS"] = "BUTTON_LONG_PRESS";
 })(DialInteractionEvent = exports.DialInteractionEvent || (exports.DialInteractionEvent = {}));
 exports.DIAL_INTERACTION_EVENT = "DIAL_INTERACTION_EVENT";
 exports.OPERATION_SUCCESS = "OPERATION_SUCCESS";

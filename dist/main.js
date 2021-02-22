@@ -22,12 +22,17 @@ nact_1.dispatch(exports.lcdController, {
 });
 exports.soundFontLibrary = SoundFontLibraryActor_1.SoundFontLibrary(system);
 exports.menuController = MenuControllerActor_1.MenuController(system);
-nact_1.dispatch(exports.menuController, {
+exports.fluidSynth = FluidSynthActor_1.Fluidsynth(system);
+nact_1.query(exports.fluidSynth, (sender) => ({ sender, type: FluidSynthActor_1.FluidSynthMessageType.START_SYNTH }), 15000)
+    .then(() => nact_1.dispatch(exports.menuController, {
     type: MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_MENU,
     menuName: "FAVORITES",
-    state: {},
-});
-exports.fluidSynth = FluidSynthActor_1.Fluidsynth(system);
+}))
+    .catch(() => nact_1.dispatch(exports.lcdController, {
+    type: LcdControllerActor_1.LcdControllerActorMessages.PRINT,
+    text: "Synth error",
+    line: 0,
+}));
 // @TODO: load default font
 DialControllerActor_1.createDial(exports.menuController);
 process.on("exit", () => {

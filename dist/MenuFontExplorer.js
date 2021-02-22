@@ -23,31 +23,35 @@ function getFileCursor() {
         type: SoundFontLibraryActor_1.SoundFontLibraryMessageTypes.CREATE_FILE_CURSOR,
     }), 250);
 }
-const FontExplorerMenu = (root) => nact_1.spawn(root, (state = { scrolling: false }, msg, ctx) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+const FontExplorerMenu = (parent) => nact_1.spawn(parent, (state = { scrolling: false }, msg, ctx) => __awaiter(void 0, void 0, void 0, function* () {
     if (msg.type === MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_MENU) {
         const cursor = state.cursor || (yield getFileCursor());
-        MenuUtils_1.updateDisplay(main_1.lcdController, MenuUtils_1.makeDisplayName(state.scrolling, cursor));
+        MenuUtils_1.updateDisplay(main_1.lcdController, MenuUtils_1.makeDisplayName(state.scrolling, cursor), "Soundfonts");
         return Object.assign(Object.assign({}, state), { cursor });
     }
     if (msg.type === ActorConstants_1.DIAL_INTERACTION_EVENT) {
         if (msg.event_type === ActorConstants_1.DialInteractionEvent.BUTTON_PRESSED) {
-            // tslint:disable-next-line: no-console
-            console.log(state.cursor.item); // @DEBUG
-            const currentFont = (_a = state.cursor.item) === null || _a === void 0 ? void 0 : _a.filename;
-            if (currentFont === undefined) {
+            const currentFont = state.cursor.item;
+            if (currentFont === null) {
                 return state;
             }
-            nact_1.dispatch(main_1.menuController, {
-                type: MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_THIS_MENU,
-                state: { font: state.cursor.item },
-                menu: MenuInstruments_1.InstrumentMenu(currentFont),
-                name: `INSTRUMENT-${currentFont}`,
-            });
+            console.log(`dispatching to`, ctx.parent);
+            const thisFontsInstrumentMenuFactory = MenuInstruments_1.InstrumentMenu(currentFont);
+            nact_1.dispatch(ctx.parent, activateThisMenuMessage(thisFontsInstrumentMenuFactory, currentFont.filename));
+            return state;
         }
         else {
-            return Object.assign(Object.assign({}, state), { scrolling: MenuUtils_1.moveCursor(msg, state) });
+            MenuUtils_1.moveCursor(msg, state);
+            return state;
         }
     }
+    return state;
 }), "EXPLORER");
 exports.FontExplorerMenu = FontExplorerMenu;
+function activateThisMenuMessage(menuFactoryFn, name) {
+    return {
+        type: MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_THIS_MENU,
+        menuFactoryFn,
+        name: `INSTRUMENT-${name}`,
+    };
+}

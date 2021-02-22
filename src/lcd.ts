@@ -40,6 +40,7 @@ export class LCD {
       this.lcd.useChar("speaker");
       this.lcd.useChar("retarrow");
       this.lcd.useChar("circle");
+      this.lcd.autoscroll();
     });
   }
 

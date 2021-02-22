@@ -21,6 +21,10 @@ const createDial = (menuController) => {
                 type: MenuControllerActor_1.MenuControllerActorMessages.DIAL_INTERACTION_EVENT,
                 event_type: ActorConstants_1.DialInteractionEvent.GO_UP,
             }),
+            onHold: () => nact_1.dispatch(menuController, {
+                type: MenuControllerActor_1.MenuControllerActorMessages.DIAL_INTERACTION_EVENT,
+                event_type: ActorConstants_1.DialInteractionEvent.BUTTON_LONG_PRESS,
+            }),
         });
     }
 };

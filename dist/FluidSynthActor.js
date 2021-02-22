@@ -22,16 +22,19 @@ const ActorConstants_1 = require("./ActorConstants");
 const main_1 = require("./main");
 const LcdControllerActor_1 = require("./LcdControllerActor");
 const SoundFontLibraryActor_1 = require("./SoundFontLibraryActor");
+// import { startWebInterface } from "./web-ui";
 const priority = process.env.FLUIDSYNTH_PRIORITY || "0";
-const defaultFluidsynthArgs = "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os_1.default.type() === "Linux"
+const midiChannel = process.env.MIDI_CHANNEL || "15";
+const defaultFluidsynthArgs = "--sample-rate 48000 --gain 2 -o synth.polyphony=16" + os_1.default.type() === "Linux"
     ? " --audio-driver=alsa"
     : "";
 const argsFromEnv = process.env.FLUIDSYNTH_ARGS;
 const fluidsynthArgs = argsFromEnv || defaultFluidsynthArgs;
-const aconnectArgs = process.env.ACONNECT_ARGS || "16:0 128:0";
+const aconnectArgs = process.env.ACONNECT_ARGS || "14:0 128:0";
 const log = ringlog_1.Log(chalk_1.default.green);
 const errorlog = ringlog_1.Log(chalk_1.default.redBright);
 function actorFn(state = { loadedFontCount: 0 }, msg, ctx) {
+    var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         if (msg.type === FluidSynthMessageType.START_SYNTH) {
             const { process, ready } = startSynth(state);
@@ -42,12 +45,34 @@ function actorFn(state = { loadedFontCount: 0 }, msg, ctx) {
             }));
             return Object.assign(Object.assign({}, state), { process });
         }
+        if (msg.type === FluidSynthMessageType.GET_INSTRUMENTS) {
+            const fontAlreadyLoaded = ((_a = state.loadedFont) === null || _a === void 0 ? void 0 : _a.filename) === msg.font.filename;
+            const { loadedFont, loadedFontCount } = fontAlreadyLoaded
+                ? state
+                : yield loadFont(state, msg.font);
+            const listener = (data) => {
+                const lines = data.toString().split("\n");
+                lines.shift();
+                const instruments = lines === null || lines === void 0 ? void 0 : lines.map((l) => ({
+                    bank: parseInt(l.substr(0, 3), 10),
+                    instrument: parseInt(l.substr(4, 3), 10),
+                    displayName: l.substring(8),
+                    filename: msg.font.filename,
+                })).filter((s) => !isNaN(s.bank));
+                state.process.stdout.removeListener("data", listener);
+                return nact_1.dispatch(msg.sender, instruments);
+            };
+            state.process.stdout.on("data", listener);
+            state.process.stdin.write(`inst ${loadedFontCount}\n`);
+            return Object.assign(Object.assign({}, state), { loadedFont, loadedFontCount });
+        }
         if (msg.type === FluidSynthMessageType.LOAD_FONT) {
             const { sender } = msg;
             const { filename, bank, instrument } = msg.entry;
-            if (filename === state.loadedFont.filename &&
-                bank === state.loadedFont.bank &&
-                instrument === state.loadedFont.bank) {
+            if (filename === ((_b = state.loadedFont) === null || _b === void 0 ? void 0 : _b.filename) &&
+                bank === ((_c = state.loadedFont) === null || _c === void 0 ? void 0 : _c.bank) &&
+                instrument === ((_d = state.loadedFont) === null || _d === void 0 ? void 0 : _d.bank)) {
+                nact_1.dispatch(sender, { result: ActorConstants_1.OPERATION_SUCCESS });
                 return state;
             }
             if (!SoundFontLibraryActor_1.fontExists(filename)) {
@@ -59,49 +84,63 @@ function actorFn(state = { loadedFontCount: 0 }, msg, ctx) {
                 });
                 return state;
             }
-            const { process, loadedFontCount } = yield getSynthForFontLoad(state);
-            const selectInstrument = ({ bank, fontId, instrument, }) => process.stdin.write(`select 15 ${fontId} ${bank} ${instrument}`);
-            if (filename === state.loadedFont.filename) {
-                selectInstrument({ bank, instrument, fontId: state.loadedFontCount });
-                return Object.assign(Object.assign({}, state), { loadedFont: msg.entry });
-            }
-            const listener = (data) => {
-                const message = data.toString();
-                if (message.includes("loaded SoundFont has ID")) {
-                    if (msg.entry.bank !== 0 && msg.entry.instrument !== 0) {
-                        // load bank and instrument
-                        const fontId = state.loadedFontCount + 1;
-                        selectInstrument({
-                            bank,
-                            instrument,
-                            fontId,
-                        });
-                    }
-                    nact_1.dispatch(sender, { result: ActorConstants_1.OPERATION_SUCCESS });
-                    nact_1.dispatch(main_1.lcdController, {
-                        type: LcdControllerActor_1.LcdControllerActorMessages.HIDE_TOAST,
-                        id: "LOADING_FONT",
-                    });
-                    process.stdout.removeListener("data", listener);
-                }
-            };
-            state.process.stdout.on("data", listener);
-            log(`Loading ${filename}...`);
-            nact_1.dispatch(main_1.lcdController, {
-                type: LcdControllerActor_1.LcdControllerActorMessages.SHOW_TOAST,
-                id: "LOADING_FONT",
-                durationMs: 0,
-                text: `Load ${filename}`,
-            });
-            if (loadedFontCount !== 0) {
-                process.stdin.write(`unload ${loadedFontCount}\n`);
-            }
-            process.stdin.write(`load soundfonts/${filename}\n`);
-            process.stdin.write("fonts\n");
-            // Note: Increments and updates loadedfont even if there was an error loading the font
-            return Object.assign(Object.assign({}, state), { process, loadedFontCount: loadedFontCount + 1, loadedFont: msg.entry });
+            const { entry } = msg;
+            const { loadedFont, loadedFontCount } = yield loadFont(state, entry);
+            nact_1.dispatch(sender, { result: ActorConstants_1.OPERATION_SUCCESS });
+            return Object.assign(Object.assign({}, state), { loadedFont, loadedFontCount });
         }
     });
+}
+function loadFont(state, entry) {
+    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const { process, loadedFontCount } = yield getSynthForFontLoad(state);
+        const { filename, bank, instrument } = entry;
+        const selectInstrument = ({ bank, fontId, instrument, }) => process.stdin.write(`select ${midiChannel} ${fontId} ${bank} ${instrument}\n`);
+        if (filename === ((_a = state.loadedFont) === null || _a === void 0 ? void 0 : _a.filename)) {
+            selectInstrument({ bank, instrument, fontId: state.loadedFontCount });
+            return resolve({
+                loadedFont: entry,
+                loadedFontCount: state.loadedFontCount,
+            });
+        }
+        const listener = (data) => {
+            const message = data.toString();
+            if (message.includes("loaded SoundFont has ID")) {
+                if (entry.bank !== 0 && entry.instrument !== 0) {
+                    // load bank and instrument
+                    const fontId = loadedFontCount + 1;
+                    selectInstrument({
+                        bank,
+                        instrument,
+                        fontId,
+                    });
+                }
+                nact_1.dispatch(main_1.lcdController, {
+                    type: LcdControllerActor_1.LcdControllerActorMessages.HIDE_TOAST,
+                    id: "LOADING_FONT",
+                });
+                process.stdout.removeListener("data", listener);
+                return resolve({
+                    loadedFont: entry,
+                    loadedFontCount: loadedFontCount + 1,
+                });
+            }
+        };
+        state.process.stdout.on("data", listener);
+        log(`Loading ${filename}...`);
+        nact_1.dispatch(main_1.lcdController, {
+            type: LcdControllerActor_1.LcdControllerActorMessages.SHOW_TOAST,
+            id: "LOADING_FONT",
+            durationMs: 0,
+            text: `Load ${filename}`,
+        });
+        if (loadedFontCount !== 0) {
+            process.stdin.write(`unload ${loadedFontCount}\n`);
+        }
+        process.stdin.write(`load soundfonts/${filename}\n`);
+        // process.stdin.write("fonts\n");
+    }));
 }
 function startSynth(state) {
     log(`FluidSynth args: ${fluidsynthArgs}`);
@@ -109,7 +148,7 @@ function startSynth(state) {
         type: LcdControllerActor_1.LcdControllerActorMessages.SHOW_TOAST,
         text: "Starting synth...",
         id: "STARTING_SYNTH",
-        durationMs: 0,
+        durationMs: 500,
     });
     if (state.process) {
         state.process.kill();
@@ -166,4 +205,5 @@ var FluidSynthMessageType;
 (function (FluidSynthMessageType) {
     FluidSynthMessageType["START_SYNTH"] = "START_SYNTH";
     FluidSynthMessageType["LOAD_FONT"] = "LOAD_FONT";
+    FluidSynthMessageType["GET_INSTRUMENTS"] = "GET_INSTRUMENTS";
 })(FluidSynthMessageType = exports.FluidSynthMessageType || (exports.FluidSynthMessageType = {}));

@@ -31,10 +31,13 @@ function loadFont(entry) {
         entry,
     }), 10000);
 }
-const FavoriteMenu = (root) => nact_1.spawn(root, (state = { scrolling: false }, msg, ctx) => __awaiter(void 0, void 0, void 0, function* () {
+const FavoriteMenu = (root) => nact_1.spawn(root, (state = {
+    scrolling: false,
+    currentlySelected: null,
+}, msg, ctx) => __awaiter(void 0, void 0, void 0, function* () {
     state.cursor = state.cursor || (yield getFavoritesCursor());
     if (msg.type === MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_MENU) {
-        MenuUtils_1.updateDisplay(main_1.lcdController, MenuUtils_1.makeDisplayName(state.scrolling, state.cursor));
+        MenuUtils_1.updateDisplay(main_1.lcdController, MenuUtils_1.makeDisplayName(state.scrolling, state.cursor), "Favorites");
         return Object.assign({}, state);
     }
     if (msg.type === ActorConstants_1.DIAL_INTERACTION_EVENT) {
@@ -60,10 +63,9 @@ const FavoriteMenu = (root) => nact_1.spawn(root, (state = { scrolling: false },
             }
             else {
                 // Button pressed, not scrolling - invoke further menu
-                nact_1.dispatch(main_1.menuController, {
+                nact_1.dispatch(ctx.parent, {
                     type: MenuControllerActor_1.MenuControllerActorMessages.ACTIVATE_MENU,
                     menuName: "EXPLORER",
-                    state: {},
                 });
                 return state;
             }

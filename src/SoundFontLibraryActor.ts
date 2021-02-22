@@ -51,31 +51,34 @@ function scanSoundfontsOnDisk() {
   const soundFontFiles = fs
     .readdirSync(path.join(__dirname, "..", "soundfonts"))
     .filter((f) => f !== "soundfontLibrary.json")
-    .map((f) => ({ filename: f, displayName: f.replace(".sf2", "") }));
+    .map((f) => ({
+      filename: f,
+      displayName: f.replace(".sf2", ""),
+      instrument: 0,
+      bank: 0,
+    }));
   return soundFontFiles;
 }
 
-function readFavorites(): Favorite[] {
+function readFavorites(): SoundFontEntry[] {
   const libFile = getLibraryFilePath();
   const libFileExists = fs.existsSync(libFile);
   return libFileExists ? require(libFile) : [];
 }
 
-function writeFavorites(library: Collection<Favorite>) {
+function writeFavorites(library: Collection<SoundFontEntry>) {
   const libFile = getLibraryFilePath();
   fs.writeFileSync(libFile, JSON.stringify(library.getItems, null, 2));
 }
 
 function getLibraryFilePath() {
-  return path.join(__dirname, "..", "soundfontLibrary.json");
+  return path.join(__dirname, "..", "soundfonts", "soundfontLibrary.json");
 }
 
 export function fontExists(filename: string) {
-  return fs.existsSync(path.join(getLibraryFilePath(), filename));
-}
-export interface SoundFontFile {
-  filename: string;
-  displayName: string;
+  const fontFile = path.join(__dirname, "..", "soundfonts", filename);
+  console.log(`Checking for ${fontFile}`);
+  return fs.existsSync(fontFile);
 }
 
 export enum SoundFontLibraryMessageTypes {
@@ -94,22 +97,22 @@ interface ScanLibraryMessage {
 
 interface AddFavoriteMessage {
   type: SoundFontLibraryMessageTypes.ADD_FAVORITE;
-  favorite: Favorite;
+  favorite: SoundFontEntry;
 }
 
 interface CreateFileCursorMessage {
   type: SoundFontLibraryMessageTypes.CREATE_FILE_CURSOR;
-  sender: Ref<Cursor<SoundFontFile>>;
+  sender: Ref<Cursor<SoundFontEntry>>;
 }
 
 interface CreateFavoriteCursorMessage {
   type: SoundFontLibraryMessageTypes.CREATE_FAVORITE_CURSOR;
-  sender: Ref<Cursor<Favorite>>;
+  sender: Ref<Cursor<SoundFontEntry>>;
 }
 
 interface RemoveFavoriteMessage {
   type: SoundFontLibraryMessageTypes.REMOVE_FAVORITE;
-  favorite: CollectionItem<Favorite>;
+  favorite: CollectionItem<SoundFontEntry>;
   sender: Ref<typeof OPERATION_SUCCESS>;
 }
 
@@ -121,11 +124,11 @@ type SoundFontLibraryMessage =
   | CreateFavoriteCursorMessage;
 
 export interface SoundFontLibraryState {
-  files: Collection<SoundFontFile>;
-  favorites: Collection<Favorite>;
+  files: Collection<SoundFontEntry>;
+  favorites: Collection<SoundFontEntry>;
 }
 
-export interface Favorite {
+export interface SoundFontEntry {
   filename: string;
   instrument: number;
   bank: number;

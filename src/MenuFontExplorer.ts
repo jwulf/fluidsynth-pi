@@ -4,27 +4,24 @@ import {
   DialInteractionEventMessage,
   DIAL_INTERACTION_EVENT,
 } from "./ActorConstants";
-import { lcdController, menuController, soundFontLibrary } from "./main";
+import { lcdController, soundFontLibrary } from "./main";
 import {
-  Favorite,
-  SoundFontFile,
+  SoundFontEntry,
   SoundFontLibraryMessageTypes,
 } from "./SoundFontLibraryActor";
-import { Collection, CollectionItem, Cursor } from "./Collection";
+import { CollectionItem, Cursor } from "./Collection";
 import {
   ActivateMenuMessage,
   MenuControllerActorMessages,
 } from "./MenuControllerActor";
 import { makeDisplayName, moveCursor, updateDisplay } from "./MenuUtils";
 import { InstrumentMenu } from "./MenuInstruments";
-
-type FavoritesMessage = DialInteractionEventMessage | ActivateMenuMessage;
+import chalk from "chalk";
 
 type FontExplorerState = {
-  cursor: Cursor<SoundFontFile>;
-  currentlySelected: CollectionItem<SoundFontFile>;
+  cursor: Cursor<SoundFontEntry>;
+  currentlySelected: CollectionItem<SoundFontEntry>;
   scrolling: boolean;
-  instrumentM: { [key: string]: Collection<Favorite> };
 };
 
 function getFileCursor() {
@@ -40,9 +37,9 @@ function getFileCursor() {
 
 type FontExplorerMessage = DialInteractionEventMessage | ActivateMenuMessage;
 
-export const FontExplorerMenu = (root: ActorSystemRef) =>
+export const FontExplorerMenu = (parent: ActorSystemRef) =>
   spawn(
-    root,
+    parent,
     async (
       state: FontExplorerState = { scrolling: false } as FontExplorerState,
       msg: FontExplorerMessage,
@@ -50,28 +47,49 @@ export const FontExplorerMenu = (root: ActorSystemRef) =>
     ) => {
       if (msg.type === MenuControllerActorMessages.ACTIVATE_MENU) {
         const cursor = state.cursor || (await getFileCursor());
-        updateDisplay(lcdController, makeDisplayName(state.scrolling, cursor));
+        updateDisplay(
+          lcdController,
+          makeDisplayName(state.scrolling, cursor),
+          "Soundfonts"
+        );
         return { ...state, cursor };
       }
       if (msg.type === DIAL_INTERACTION_EVENT) {
         if (msg.event_type === DialInteractionEvent.BUTTON_PRESSED) {
-          // tslint:disable-next-line: no-console
-          console.log(state.cursor.item); // @DEBUG
-
-          const currentFont = state.cursor.item?.filename;
-          if (currentFont === undefined) {
+          const currentFont = state.cursor.item;
+          if (currentFont === null) {
             return state;
           }
-          dispatch(menuController, {
-            type: MenuControllerActorMessages.ACTIVATE_THIS_MENU,
-            state: { font: state.cursor.item },
-            menu: InstrumentMenu(currentFont),
-            name: `INSTRUMENT-${currentFont}`,
-          });
+          console.log(`dispatching to`, ctx.parent);
+
+          const thisFontsInstrumentMenuFactory = InstrumentMenu(currentFont);
+
+          dispatch(
+            ctx.parent,
+            activateThisMenuMessage(
+              thisFontsInstrumentMenuFactory,
+              currentFont.filename
+            )
+          );
+
+          return state;
         } else {
-          return { ...state, scrolling: moveCursor(msg, state) };
+          moveCursor(msg, state);
+          return state;
         }
       }
+      return state;
     },
     "EXPLORER"
   );
+
+function activateThisMenuMessage(
+  menuFactoryFn: (parent: ActorSystemRef, name: string) => Ref<any>,
+  name: string
+) {
+  return {
+    type: MenuControllerActorMessages.ACTIVATE_THIS_MENU,
+    menuFactoryFn,
+    name: `INSTRUMENT-${name}`,
+  };
+}

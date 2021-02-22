@@ -24,6 +24,11 @@ export const createDial = (menuController: ActorSystemRef) => {
           type: MenuControllerActorMessages.DIAL_INTERACTION_EVENT,
           event_type: DialInteractionEvent.GO_UP,
         }),
+      onHold: () =>
+        dispatch(menuController, {
+          type: MenuControllerActorMessages.DIAL_INTERACTION_EVENT,
+          event_type: DialInteractionEvent.BUTTON_LONG_PRESS,
+        }),
     });
   }
 };

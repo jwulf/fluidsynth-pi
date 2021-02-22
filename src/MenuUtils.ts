@@ -9,16 +9,27 @@ import { lcdController } from "./main";
 
 export function makeDisplayName(
   scrolling: boolean,
-  cursor: Cursor<{ displayName: string }>
+  cursor?: Cursor<{ displayName: string }>
 ) {
-  return cursor.item === null
+  return cursor?.item === null
     ? "Empty"
     : scrolling
-    ? cursor.item?.displayName
-    : `:arrowright: ${cursor.item?.displayName?.padEnd(14, " ")}`;
+    ? cursor?.item?.displayName || "Unknown"
+    : `:arrowright: ${cursor?.item?.displayName?.padEnd(14, " ")}`;
 }
 
-export function updateDisplay(lcdController: Ref<any>, text: string) {
+export function updateDisplay(
+  lcdController: Ref<any>,
+  text: string,
+  menuTitle = ""
+) {
+  const center = (s: string) => {
+    const t = s.length < 14 ? `[${s}]` : s;
+    const len = t.length;
+    const endPadding = Math.floor((16 - len) / 2);
+    return t.padEnd(16 - endPadding, " ").padStart(16, " ");
+  };
+  const fMenuTitle = menuTitle === "" ? "" : center(menuTitle);
   dispatch(lcdController, {
     type: LcdControllerActorMessages.PRINT,
     text,
@@ -26,13 +37,16 @@ export function updateDisplay(lcdController: Ref<any>, text: string) {
   });
   dispatch(lcdController, {
     type: LcdControllerActorMessages.PRINT,
-    text: "",
+    text: fMenuTitle,
     line: 1,
   });
 }
 
-export type MenuState<T extends { displayName: string }> = {
-  currentlySelected: CollectionItem<T>;
+export interface MenuItem {
+  displayName: string;
+}
+export type MenuState<T extends MenuItem> = {
+  currentlySelected: CollectionItem<T> | null;
   cursor: Cursor<T>;
 };
 
@@ -40,13 +54,13 @@ export function moveCursor<T extends { displayName: string }>(
   msg: DialInteractionEventMessage,
   state: MenuState<T>
 ) {
-  const previous = state.cursor.item?.uuid;
+  const previous = state.cursor?.item?.uuid;
   msg.event_type === DialInteractionEvent.GO_DOWN
     ? state.cursor.moveBack()
     : state.cursor.moveForward();
 
-  const justChanged = state.cursor.item?.uuid !== previous;
-  const scrolling = state.cursor.item?.uuid !== state.currentlySelected?.uuid;
+  const justChanged = state.cursor?.item?.uuid !== previous;
+  const scrolling = state.cursor?.item?.uuid !== state.currentlySelected?.uuid;
   if (justChanged) {
     dispatch(lcdController, {
       type: LcdControllerActorMessages.PRINT,

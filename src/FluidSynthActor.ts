@@ -11,18 +11,21 @@ import {
 } from "./ActorConstants";
 import { lcdController } from "./main";
 import { LcdControllerActorMessages } from "./LcdControllerActor";
-import { fontExists, Favorite } from "./SoundFontLibraryActor";
+import { fontExists, SoundFontEntry } from "./SoundFontLibraryActor";
 import { CollectionItem } from "./Collection";
+// import { startWebInterface } from "./web-ui";
 
 const priority = process.env.FLUIDSYNTH_PRIORITY || "0";
 
+const midiChannel = process.env.MIDI_CHANNEL || "15";
+
 const defaultFluidsynthArgs =
-  "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os.type() === "Linux"
+  "--sample-rate 48000 --gain 2 -o synth.polyphony=16" + os.type() === "Linux"
     ? " --audio-driver=alsa"
     : "";
 const argsFromEnv = process.env.FLUIDSYNTH_ARGS;
 const fluidsynthArgs = argsFromEnv || defaultFluidsynthArgs;
-const aconnectArgs = process.env.ACONNECT_ARGS || "16:0 128:0";
+const aconnectArgs = process.env.ACONNECT_ARGS || "14:0 128:0";
 
 const log = Log(chalk.green);
 const errorlog = Log(chalk.redBright);
@@ -45,14 +48,39 @@ async function actorFn(
     );
     return { ...state, process };
   }
+  if (msg.type === FluidSynthMessageType.GET_INSTRUMENTS) {
+    const fontAlreadyLoaded = state.loadedFont?.filename === msg.font.filename;
+    const { loadedFont, loadedFontCount } = fontAlreadyLoaded
+      ? state
+      : await loadFont(state, msg.font);
+
+    const listener = (data: Buffer) => {
+      const lines = data.toString().split("\n");
+      lines.shift();
+      const instruments: SoundFontEntry[] = lines
+        ?.map((l) => ({
+          bank: parseInt(l.substr(0, 3), 10),
+          instrument: parseInt(l.substr(4, 3), 10),
+          displayName: l.substring(8),
+          filename: msg.font.filename,
+        }))
+        .filter((s) => !isNaN(s.bank));
+      state.process.stdout.removeListener("data", listener);
+      return dispatch(msg.sender, instruments);
+    };
+    state.process.stdout.on("data", listener);
+    state.process.stdin.write(`inst ${loadedFontCount}\n`);
+    return { ...state, loadedFont, loadedFontCount };
+  }
   if (msg.type === FluidSynthMessageType.LOAD_FONT) {
     const { sender } = msg;
     const { filename, bank, instrument } = msg.entry;
     if (
-      filename === state.loadedFont.filename &&
-      bank === state.loadedFont.bank &&
-      instrument === state.loadedFont.bank
+      filename === state.loadedFont?.filename &&
+      bank === state.loadedFont?.bank &&
+      instrument === state.loadedFont?.bank
     ) {
+      dispatch(sender, { result: OPERATION_SUCCESS });
       return state;
     }
     if (!fontExists(filename)) {
@@ -64,7 +92,23 @@ async function actorFn(
       });
       return state;
     }
+    const { entry } = msg;
+    const { loadedFont, loadedFontCount } = await loadFont(state, entry);
+    dispatch(sender, { result: OPERATION_SUCCESS });
+    return { ...state, loadedFont, loadedFontCount };
+  }
+}
+
+function loadFont(
+  state: FluidSynthState,
+  entry: CollectionItem<SoundFontEntry>
+): Promise<{
+  loadedFont: CollectionItem<SoundFontEntry>;
+  loadedFontCount: number;
+}> {
+  return new Promise(async (resolve, reject) => {
     const { process, loadedFontCount } = await getSynthForFontLoad(state);
+    const { filename, bank, instrument } = entry;
 
     const selectInstrument = ({
       bank,
@@ -74,34 +118,40 @@ async function actorFn(
       bank: number;
       instrument: number;
       fontId: number;
-    }) => process.stdin.write(`select 15 ${fontId} ${bank} ${instrument}`);
+    }) =>
+      process.stdin.write(
+        `select ${midiChannel} ${fontId} ${bank} ${instrument}\n`
+      );
 
-    if (filename === state.loadedFont.filename) {
+    if (filename === state.loadedFont?.filename) {
       selectInstrument({ bank, instrument, fontId: state.loadedFontCount });
-      return {
-        ...state,
-        loadedFont: msg.entry,
-      };
+      return resolve({
+        loadedFont: entry,
+        loadedFontCount: state.loadedFontCount,
+      });
     }
 
     const listener = (data: Buffer) => {
       const message = data.toString();
       if (message.includes("loaded SoundFont has ID")) {
-        if (msg.entry.bank !== 0 && msg.entry.instrument !== 0) {
+        if (entry.bank !== 0 && entry.instrument !== 0) {
           // load bank and instrument
-          const fontId = state.loadedFontCount + 1;
+          const fontId = loadedFontCount + 1;
           selectInstrument({
             bank,
             instrument,
             fontId,
           });
         }
-        dispatch(sender, { result: OPERATION_SUCCESS });
         dispatch(lcdController, {
           type: LcdControllerActorMessages.HIDE_TOAST,
           id: "LOADING_FONT",
         });
         process.stdout.removeListener("data", listener);
+        return resolve({
+          loadedFont: entry,
+          loadedFontCount: loadedFontCount + 1,
+        });
       }
     };
     state.process.stdout.on("data", listener);
@@ -116,15 +166,8 @@ async function actorFn(
       process.stdin.write(`unload ${loadedFontCount}\n`);
     }
     process.stdin.write(`load soundfonts/${filename}\n`);
-    process.stdin.write("fonts\n");
-    // Note: Increments and updates loadedfont even if there was an error loading the font
-    return {
-      ...state,
-      process,
-      loadedFontCount: loadedFontCount + 1,
-      loadedFont: msg.entry,
-    };
-  }
+    // process.stdin.write("fonts\n");
+  });
 }
 
 function startSynth(state: FluidSynthState) {
@@ -133,7 +176,7 @@ function startSynth(state: FluidSynthState) {
     type: LcdControllerActorMessages.SHOW_TOAST,
     text: "Starting synth...",
     id: "STARTING_SYNTH",
-    durationMs: 0,
+    durationMs: 500,
   });
   if (state.process) {
     state.process.kill();
@@ -189,6 +232,7 @@ export const Fluidsynth = (root: ActorSystemRef) =>
 export enum FluidSynthMessageType {
   START_SYNTH = "START_SYNTH",
   LOAD_FONT = "LOAD_FONT",
+  GET_INSTRUMENTS = "GET_INSTRUMENTS",
 }
 
 interface StartSynthMessage {
@@ -196,16 +240,25 @@ interface StartSynthMessage {
   sender: ActorSystemRef;
 }
 
+type GetInstrumentsMessage = {
+  type: FluidSynthMessageType.GET_INSTRUMENTS;
+  sender: ActorSystemRef;
+  font: CollectionItem<SoundFontEntry>;
+};
+
 export type LoadFontMessage = {
   type: FluidSynthMessageType.LOAD_FONT;
   sender: Ref<OperationResult>;
-  entry: CollectionItem<Favorite>;
+  entry: CollectionItem<SoundFontEntry>;
 };
 
-type FluidSynthMessage = StartSynthMessage | LoadFontMessage;
+type FluidSynthMessage =
+  | StartSynthMessage
+  | LoadFontMessage
+  | GetInstrumentsMessage;
 
 interface FluidSynthState {
   process: cp.ChildProcessWithoutNullStreams;
   loadedFontCount: number;
-  loadedFont: Favorite;
+  loadedFont: SoundFontEntry | undefined;
 }

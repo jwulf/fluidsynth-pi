@@ -14,6 +14,7 @@ export enum DialInteractionEvent {
   BUTTON_PRESSED = "BUTTON_PRESSED",
   GO_UP = "GO_UP",
   GO_DOWN = "GO_DOWN",
+  BUTTON_LONG_PRESS = "BUTTON_LONG_PRESS",
 }
 
 export interface DialInteractionEventMessage {

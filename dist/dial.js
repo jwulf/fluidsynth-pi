@@ -7,7 +7,8 @@ exports.Dial = void 0;
 const johnny_five_1 = __importDefault(require("johnny-five"));
 const board_1 = require("./board");
 const delay = parseInt(process.env.ROTARY_DELAY || "500", 10);
-function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
+let cycle = "DOWN";
+function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, onHold, }) {
     // https://gist.github.com/rwaldron/5db750527f257636c5d3b2c492737c99
     let value = 0;
     let rotation = 0;
@@ -62,10 +63,21 @@ function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, }) {
     };
     bPin.on("change", handler);
     aPin.on("change", handler);
-    pressButton.on("up", () => onPress());
+    pressButton.on("down", () => (cycle = "DOWN"));
+    pressButton.on("press", () => (cycle = "PRESS"));
+    pressButton.on("hold", () => (cycle = "HOLD"));
+    pressButton.on("up", () => {
+        // It cycles "DOWN" -> "PRESS" -> ["HOLD"] -> "UP"
+        if (cycle === "PRESS") {
+            onPress();
+        }
+        else {
+            onHold();
+        }
+    });
 }
 class Dial {
-    constructor({ onDown, onPress, onUp, }) {
+    constructor({ onDown, onPress, onUp, onHold, }) {
         board_1.board().ready.then(() => {
             const aPin = new johnny_five_1.default.Pin({
                 pin: "GPIO4",
@@ -95,6 +107,10 @@ class Dial {
                 onPress: () => {
                     console.log("press");
                     onPress();
+                },
+                onHold: () => {
+                    console.log("hold");
+                    onHold();
                 },
             });
         });

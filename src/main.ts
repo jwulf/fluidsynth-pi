@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // import { startWebInterface } from "./web-ui";
-import { start, dispatch } from "nact";
+import { start, dispatch, query } from "nact";
 import {
   LcdController,
   LcdControllerActorMessages,
@@ -12,7 +12,7 @@ import {
   MenuControllerActorMessages,
 } from "./MenuControllerActor";
 import { createDial } from "./DialControllerActor";
-import { Fluidsynth } from "./FluidSynthActor";
+import { Fluidsynth, FluidSynthMessageType } from "./FluidSynthActor";
 import { SoundFontLibrary } from "./SoundFontLibraryActor";
 
 const system = start();
@@ -26,13 +26,27 @@ dispatch(lcdController, {
 export const soundFontLibrary = SoundFontLibrary(system);
 export const menuController = MenuController(system);
 
-dispatch(menuController, {
-  type: MenuControllerActorMessages.ACTIVATE_MENU,
-  menuName: "FAVORITES",
-  state: {},
-});
-
 export const fluidSynth = Fluidsynth(system);
+
+query(
+  fluidSynth,
+  (sender) => ({ sender, type: FluidSynthMessageType.START_SYNTH }),
+  15000
+)
+  .then(() =>
+    dispatch(menuController, {
+      type: MenuControllerActorMessages.ACTIVATE_MENU,
+      menuName: "FAVORITES",
+    })
+  )
+  .catch(() =>
+    dispatch(lcdController, {
+      type: LcdControllerActorMessages.PRINT,
+      text: "Synth error",
+      line: 0,
+    })
+  );
+
 // @TODO: load default font
 createDial(menuController);
 

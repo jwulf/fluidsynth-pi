@@ -6,5 +6,6 @@
 # WEBUI_ENABLED=true # Enable Web UI
 # ROTARY_DELAY=500 # millisecond debounce for rotary Dial
 # FLUIDSYNTH_ARGS="--sample-rate 48000 --gain 3 -o synth.polyphony=16" 
-# ACONNECT_ARGS="16:0 128:0"
+# ACONNECT_ARGS="14:0 128:0" # This connects the MIDI controller to Fluidsynth, use aconnect -i to get it
 # DEFAULT_SOUNDFONT=   # Default soundfont filename to load on start
+# MIDI_CHANNEL=15   # The midi channel for instrument selection

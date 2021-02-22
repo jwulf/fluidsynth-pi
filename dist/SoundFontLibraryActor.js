@@ -45,7 +45,12 @@ function scanSoundfontsOnDisk() {
     const soundFontFiles = fs_1.default
         .readdirSync(path_1.default.join(__dirname, "..", "soundfonts"))
         .filter((f) => f !== "soundfontLibrary.json")
-        .map((f) => ({ filename: f, displayName: f.replace(".sf2", "") }));
+        .map((f) => ({
+        filename: f,
+        displayName: f.replace(".sf2", ""),
+        instrument: 0,
+        bank: 0,
+    }));
     return soundFontFiles;
 }
 function readFavorites() {
@@ -58,10 +63,12 @@ function writeFavorites(library) {
     fs_1.default.writeFileSync(libFile, JSON.stringify(library.getItems, null, 2));
 }
 function getLibraryFilePath() {
-    return path_1.default.join(__dirname, "..", "soundfontLibrary.json");
+    return path_1.default.join(__dirname, "..", "soundfonts", "soundfontLibrary.json");
 }
 function fontExists(filename) {
-    return fs_1.default.existsSync(path_1.default.join(getLibraryFilePath(), filename));
+    const fontFile = path_1.default.join(__dirname, "..", "soundfonts", filename);
+    console.log(`Checking for ${fontFile}`);
+    return fs_1.default.existsSync(fontFile);
 }
 exports.fontExists = fontExists;
 var SoundFontLibraryMessageTypes;

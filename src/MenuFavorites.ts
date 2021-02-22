@@ -7,15 +7,9 @@ import {
   OperationResult,
   OPERATION_SUCCESS,
 } from "./ActorConstants";
+import { fluidSynth, lcdController, soundFontLibrary } from "./main";
 import {
-  fluidSynth,
-  lcdController,
-  menuController,
-  soundFontLibrary,
-} from "./main";
-import {
-  Favorite,
-  SoundFontFile,
+  SoundFontEntry,
   SoundFontLibraryMessageTypes,
 } from "./SoundFontLibraryActor";
 import { LcdControllerActorMessages } from "./LcdControllerActor";
@@ -32,10 +26,10 @@ import {
   updateDisplay,
 } from "./MenuUtils";
 
-interface FavoritesState extends MenuState<Favorite> {
-  cursor: Cursor<Favorite>;
+interface FavoritesState extends MenuState<SoundFontEntry> {
+  cursor: Cursor<SoundFontEntry>;
   scrolling: boolean;
-  currentlySelected: CollectionItem<Favorite>;
+  currentlySelected: CollectionItem<SoundFontEntry> | null;
 }
 
 type FavoritesMessage = DialInteractionEventMessage | ActivateMenuMessage;
@@ -43,7 +37,7 @@ type FavoritesMessage = DialInteractionEventMessage | ActivateMenuMessage;
 function getFavoritesCursor() {
   return query(
     soundFontLibrary,
-    (sender: Ref<Cursor<SoundFontFile>>) => ({
+    (sender: Ref<Cursor<SoundFontEntry>>) => ({
       sender,
       type: SoundFontLibraryMessageTypes.CREATE_FAVORITE_CURSOR,
     }),
@@ -51,7 +45,7 @@ function getFavoritesCursor() {
   );
 }
 
-function loadFont<T>(entry: CollectionItem<Favorite>) {
+function loadFont<T>(entry: CollectionItem<SoundFontEntry>) {
   return query(
     fluidSynth,
     (sender: Ref<OperationResult>) => ({
@@ -67,7 +61,10 @@ export const FavoriteMenu = (root: ActorSystemRef) =>
   spawn(
     root,
     async (
-      state: FavoritesState = { scrolling: false } as FavoritesState,
+      state: FavoritesState = {
+        scrolling: false,
+        currentlySelected: null,
+      } as FavoritesState,
       msg: FavoritesMessage,
       ctx
     ) => {
@@ -75,7 +72,8 @@ export const FavoriteMenu = (root: ActorSystemRef) =>
       if (msg.type === MenuControllerActorMessages.ACTIVATE_MENU) {
         updateDisplay(
           lcdController,
-          makeDisplayName(state.scrolling, state.cursor)
+          makeDisplayName(state.scrolling, state.cursor),
+          "Favorites"
         );
         return { ...state };
       }
@@ -104,10 +102,9 @@ export const FavoriteMenu = (root: ActorSystemRef) =>
             }
           } else {
             // Button pressed, not scrolling - invoke further menu
-            dispatch(menuController, {
+            dispatch(ctx.parent, {
               type: MenuControllerActorMessages.ACTIVATE_MENU,
               menuName: "EXPLORER",
-              state: {},
             });
             return state;
           }
