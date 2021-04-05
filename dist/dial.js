@@ -97,19 +97,19 @@ class Dial {
                 bPin,
                 pressButton,
                 onUp: () => {
-                    console.log("up");
+                    // console.log("up");
                     onUp();
                 },
                 onDown: () => {
-                    console.log("down");
+                    // console.log("down");
                     onDown();
                 },
                 onPress: () => {
-                    console.log("press");
+                    // console.log("press");
                     onPress();
                 },
                 onHold: () => {
-                    console.log("hold");
+                    // console.log("hold");
                     onHold();
                 },
             });

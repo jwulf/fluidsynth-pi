@@ -22,6 +22,7 @@ const ActorConstants_1 = require("./ActorConstants");
 const main_1 = require("./main");
 const LcdControllerActor_1 = require("./LcdControllerActor");
 const SoundFontLibraryActor_1 = require("./SoundFontLibraryActor");
+const escape_path_with_spaces_1 = __importDefault(require("escape-path-with-spaces"));
 // import { startWebInterface } from "./web-ui";
 const priority = process.env.FLUIDSYNTH_PRIORITY || "0";
 const midiChannel = process.env.MIDI_CHANNEL || "15";
@@ -138,7 +139,7 @@ function loadFont(state, entry) {
         if (loadedFontCount !== 0) {
             process.stdin.write(`unload ${loadedFontCount}\n`);
         }
-        process.stdin.write(`load soundfonts/${filename}\n`);
+        process.stdin.write(`load soundfonts/${escape_path_with_spaces_1.default(filename)}\n`);
         // process.stdin.write("fonts\n");
     }));
 }

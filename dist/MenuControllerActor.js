@@ -5,6 +5,7 @@ const nact_1 = require("nact");
 const ActorConstants_1 = require("./ActorConstants");
 const MenuFavorites_1 = require("./MenuFavorites");
 const MenuFontExplorer_1 = require("./MenuFontExplorer");
+const MenuSystem_1 = require("./MenuSystem");
 const ringlog_1 = require("./ringlog");
 const log = ringlog_1.Log();
 var MenuControllerActorMessages;
@@ -72,6 +73,7 @@ const MenuController = (parent) => {
     }, ActorConstants_1.Actor.MenuController);
     MenuFavorites_1.FavoriteMenu(menuController);
     MenuFontExplorer_1.FontExplorerMenu(menuController);
+    MenuSystem_1.SystemMenu(menuController);
     return menuController;
 };
 exports.MenuController = MenuController;

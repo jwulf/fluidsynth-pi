@@ -10,6 +10,7 @@ var Actor;
     Actor["SoundFontLibraryCursor"] = "SoundFontLibraryCursor";
     Actor["Fluidsynth"] = "Fluidsynth";
     Actor["MenuFavorites"] = "MenuFavorites";
+    Actor["InstrumentContext"] = "InstrumentContext";
 })(Actor = exports.Actor || (exports.Actor = {}));
 var DialInteractionEvent;
 (function (DialInteractionEvent) {

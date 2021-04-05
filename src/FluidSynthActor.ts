@@ -13,6 +13,7 @@ import { lcdController } from "./main";
 import { LcdControllerActorMessages } from "./LcdControllerActor";
 import { fontExists, SoundFontEntry } from "./SoundFontLibraryActor";
 import { CollectionItem } from "./Collection";
+import escape from "escape-path-with-spaces";
 // import { startWebInterface } from "./web-ui";
 
 const priority = process.env.FLUIDSYNTH_PRIORITY || "0";
@@ -165,7 +166,7 @@ function loadFont(
     if (loadedFontCount !== 0) {
       process.stdin.write(`unload ${loadedFontCount}\n`);
     }
-    process.stdin.write(`load soundfonts/${filename}\n`);
+    process.stdin.write(`load soundfonts/${escape(filename)}\n`);
     // process.stdin.write("fonts\n");
   });
 }

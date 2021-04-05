@@ -60,7 +60,7 @@ export const FontExplorerMenu = (parent: ActorSystemRef) =>
           if (currentFont === null) {
             return state;
           }
-          console.log(`dispatching to`, ctx.parent);
+          // console.log(`dispatching to`, ctx.parent);
 
           const thisFontsInstrumentMenuFactory = InstrumentMenu(currentFont);
 

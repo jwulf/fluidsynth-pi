@@ -35,7 +35,7 @@ const FontExplorerMenu = (parent) => nact_1.spawn(parent, (state = { scrolling: 
             if (currentFont === null) {
                 return state;
             }
-            console.log(`dispatching to`, ctx.parent);
+            // console.log(`dispatching to`, ctx.parent);
             const thisFontsInstrumentMenuFactory = MenuInstruments_1.InstrumentMenu(currentFont);
             nact_1.dispatch(ctx.parent, activateThisMenuMessage(thisFontsInstrumentMenuFactory, currentFont.filename));
             return state;

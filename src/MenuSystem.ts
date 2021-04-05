@@ -20,7 +20,7 @@ interface SystemMenuItem extends MenuItem {
 const menuItems = new Collection([
   { displayName: "Shutdown", intent: "SHUTDOWN" as const },
   { displayName: "Restart", intent: "RESTART" as const },
-  { displayName: "Return", intent: "EXIT" as const },
+  { displayName: "Exit menu", intent: "EXIT" as const },
 ]);
 const cursor = menuItems.createCursor();
 
@@ -34,7 +34,7 @@ export const SystemMenu = (root: ActorSystemRef) =>
     async (
       state: SystemMenuState = { cursor, currentlySelected: cursor.item },
       msg: SystemMenuMessage,
-      ctx
+      _
     ) => {
       const { type } = msg;
       switch (type) {

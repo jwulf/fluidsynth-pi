@@ -6,6 +6,7 @@ import {
 } from "./ActorConstants";
 import { FavoriteMenu } from "./MenuFavorites";
 import { FontExplorerMenu } from "./MenuFontExplorer";
+import { SystemMenu } from "./MenuSystem";
 import { Log } from "./ringlog";
 
 type MenuList = "FAVORITES" | "EXPLORER" | "SYSTEM";
@@ -119,5 +120,6 @@ export const MenuController = (parent: any): Ref<Message> => {
   );
   FavoriteMenu(menuController);
   FontExplorerMenu(menuController);
+  SystemMenu(menuController);
   return menuController;
 };

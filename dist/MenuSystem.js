@@ -24,10 +24,10 @@ const LcdControllerActor_1 = require("./LcdControllerActor");
 const menuItems = new Collection_1.Collection([
     { displayName: "Shutdown", intent: "SHUTDOWN" },
     { displayName: "Restart", intent: "RESTART" },
-    { displayName: "Return", intent: "EXIT" },
+    { displayName: "Exit menu", intent: "EXIT" },
 ]);
 const cursor = menuItems.createCursor();
-const SystemMenu = (root) => nact_1.spawn(root, (state = { cursor, currentlySelected: cursor.item }, msg, ctx) => __awaiter(void 0, void 0, void 0, function* () {
+const SystemMenu = (root) => nact_1.spawn(root, (state = { cursor, currentlySelected: cursor.item }, msg, _) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const { type } = msg;
     switch (type) {

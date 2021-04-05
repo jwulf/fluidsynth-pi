@@ -8,6 +8,7 @@ export enum Actor {
   "SoundFontLibraryCursor" = "SoundFontLibraryCursor",
   "Fluidsynth" = "Fluidsynth",
   "MenuFavorites" = "MenuFavorites",
+  "InstrumentContext" = "InstrumentContext",
 }
 
 export enum DialInteractionEvent {

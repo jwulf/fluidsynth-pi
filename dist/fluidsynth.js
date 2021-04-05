@@ -114,7 +114,8 @@ class FluidSynth extends events_1.EventEmitter {
                 this.process.stdin.write(`unload ${this.loadedFontCount}\n`);
             }
             this.loadedFontCount++;
-            this.process.stdin.write(`load soundfonts/${fontname}\n`);
+            this.log(`Executing load soundfonts/${escape(fontname)}...`);
+            this.process.stdin.write(`load soundfonts/${escape(fontname)}\n`);
             this.process.stdin.write("fonts\n");
             this.currentSoundFont = fontname;
             this.lcdPrint(this.currentSoundFont, 0);
