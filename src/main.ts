@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-// import { startWebInterface } from "./web-ui";
 import { start, dispatch, query } from "nact";
 import {
   LcdController,
@@ -63,12 +62,3 @@ process.on("exit", () => {
   });
 });
 
-// Disable web interface during refactor
-
-// const webUIEnabled =
-//   (process.env.WEBUI_ENABLED || "true").toLowerCase() !== "false";
-
-// log(`Web UI: ${webUIEnabled ? "enabled" : "disabled"}`);
-// if (webUIEnabled) {
-//   startWebInterface(fluidsynth, menu);
-// }

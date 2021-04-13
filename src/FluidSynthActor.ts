@@ -21,7 +21,7 @@ const priority = process.env.FLUIDSYNTH_PRIORITY || "0";
 const midiChannel = process.env.MIDI_CHANNEL || "15";
 
 const defaultFluidsynthArgs =
-  "--sample-rate 48000 --gain 2 -o synth.polyphony=16" + os.type() === "Linux"
+  "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os.type() === "Linux"
     ? " --audio-driver=alsa"
     : "";
 const argsFromEnv = process.env.FLUIDSYNTH_ARGS;

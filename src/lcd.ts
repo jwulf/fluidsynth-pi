@@ -51,9 +51,9 @@ export class LCD {
     }
   }
 
-  printAt(message = "", lineNum = 0, colNum = 0) {
-    if (this.lcd) {
-      this.lcd.cursor(lineNum, colNum).print(message);
-    }
-  }
+  // printAt(message = "", lineNum = 0, colNum = 0) {
+  //   if (this.lcd) {
+  //     this.lcd.cursor(lineNum, colNum).print(message);
+  //   }
+  // }
 }

@@ -2,8 +2,10 @@ import chalk from "chalk";
 import { dispatch, Ref, spawn } from "nact";
 import { Actor } from "./ActorConstants";
 import { LCD } from "./lcd";
+import { LCD2 } from "./lcd2";
 import { LcdToastRemover, LcdToasterMessage } from "./LcdToastActor";
 import { Log } from "./ringlog";
+import { synthVersion } from "./version";
 
 /**
  * Note: there is an edge case: if you show a toast with a duration, then
@@ -12,10 +14,9 @@ import { Log } from "./ringlog";
 
 const log = Log(chalk.yellowBright);
 
-const lcdEnabled = (process.env.ENABLE_LCD || "false").toLowerCase() === "true";
-const lcd = lcdEnabled ? new LCD() : null;
+const lcd = synthVersion === "1" ? new LCD() : new LCD2();
 
-log(`LCD ${lcdEnabled ? "enabled" : "disabled"}`);
+log(`Synth version: ${synthVersion ? "enabled" : "disabled"}`);
 
 const lcdPrint = (msg: string, line: number) => {
   if (lcd) {
