@@ -1,16 +1,16 @@
 import chalk from "chalk";
-import five from "johnny-five";
-import { board } from "./board";
 import { Log } from "./ringlog";
 
 export class LCD {
-  lcd!: five.LCD;
+  lcd!: any;
   log: (msg: string) => void;
   board: any;
   public content: (string | undefined)[] = [undefined, undefined];
   constructor() {
     this.log = Log(chalk.greenBright);
-    this.board = board().ready.then((board) => {
+    const five = require("johnny-five");
+    const { board } = require("./board");
+    this.board = board().ready.then(() => {
       this.lcd = new five.LCD({
         // pin layout for Zero W: https://pi4j.com/1.2/pins/model-zerow-rev1.html
         // lcd pins: ["GND", "VDD", "VO",  "RS", "RW", "EN", "DB0", "DB1", "DB2", "DB3", "DB4", "DB5", "DB6", "DB7", "LED+", "LED-"]
@@ -51,9 +51,4 @@ export class LCD {
     }
   }
 
-  // printAt(message = "", lineNum = 0, colNum = 0) {
-  //   if (this.lcd) {
-  //     this.lcd.cursor(lineNum, colNum).print(message);
-  //   }
-  // }
 }

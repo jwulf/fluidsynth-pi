@@ -1,5 +1,3 @@
-import five from "johnny-five";
-import { board } from "./board";
 const delay = parseInt(process.env.ROTARY_DELAY || "500", 10);
 
 let cycle: "DOWN" | "PRESS" | "HOLD" | "UP" = "DOWN";
@@ -13,9 +11,9 @@ function rotaryEncoder({
   onPress,
   onHold,
 }: {
-  aPin: five.Pin;
-  bPin: five.Pin;
-  pressButton: five.Button;
+  aPin: any // five.Pin;
+  bPin: any // five.Pin;
+  pressButton: any // five.Button;
   onUp: () => void;
   onDown: () => void;
   onPress: () => void;
@@ -111,6 +109,8 @@ export class Dial {
     onDown: Handler;
     onHold: Handler;
   }) {
+    const five = require("johnny-five");
+    const { board } = require("./board");
     board().ready.then(() => {
       const aPin = new five.Pin({
         pin: "GPIO4",
