@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.fluidSynth = exports.menuController = exports.soundFontLibrary = exports.lcdController = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-// import { startWebInterface } from "./web-ui";
 const nact_1 = require("nact");
 const LcdControllerActor_1 = require("./LcdControllerActor");
 const MenuControllerActor_1 = require("./MenuControllerActor");
@@ -47,10 +46,3 @@ process.on("exit", () => {
         line: 1,
     });
 });
-// Disable web interface during refactor
-// const webUIEnabled =
-//   (process.env.WEBUI_ENABLED || "true").toLowerCase() !== "false";
-// log(`Web UI: ${webUIEnabled ? "enabled" : "disabled"}`);
-// if (webUIEnabled) {
-//   startWebInterface(fluidsynth, menu);
-// }

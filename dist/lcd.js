@@ -5,15 +5,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LCD = void 0;
 const chalk_1 = __importDefault(require("chalk"));
-const johnny_five_1 = __importDefault(require("johnny-five"));
-const board_1 = require("./board");
 const ringlog_1 = require("./ringlog");
 class LCD {
     constructor() {
         this.content = [undefined, undefined];
         this.log = ringlog_1.Log(chalk_1.default.greenBright);
-        this.board = board_1.board().ready.then((board) => {
-            this.lcd = new johnny_five_1.default.LCD({
+        const five = require("johnny-five");
+        const { board } = require("./board");
+        this.board = board().ready.then(() => {
+            this.lcd = new five.LCD({
                 // pin layout for Zero W: https://pi4j.com/1.2/pins/model-zerow-rev1.html
                 // lcd pins: ["GND", "VDD", "VO",  "RS", "RW", "EN", "DB0", "DB1", "DB2", "DB3", "DB4", "DB5", "DB6", "DB7", "LED+", "LED-"]
                 // lcd pin - func -  rpi pin - func         -    note
@@ -49,11 +49,6 @@ class LCD {
         if (this.lcd) {
             this.lcd.cursor(lineNum, 0).print(message);
             this.content[lineNum] = message;
-        }
-    }
-    printAt(message = "", lineNum = 0, colNum = 0) {
-        if (this.lcd) {
-            this.lcd.cursor(lineNum, colNum).print(message);
         }
     }
 }

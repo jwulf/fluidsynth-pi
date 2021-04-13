@@ -8,16 +8,16 @@ const chalk_1 = __importDefault(require("chalk"));
 const nact_1 = require("nact");
 const ActorConstants_1 = require("./ActorConstants");
 const lcd_1 = require("./lcd");
+const lcd2_1 = require("./lcd2");
 const LcdToastActor_1 = require("./LcdToastActor");
 const ringlog_1 = require("./ringlog");
+const version_1 = require("./version");
 /**
  * Note: there is an edge case: if you show a toast with a duration, then
  * show a toast with the same id, then the first duration will cancel the second toast.
  */
 const log = ringlog_1.Log(chalk_1.default.yellowBright);
-const lcdEnabled = (process.env.ENABLE_LCD || "false").toLowerCase() === "true";
-const lcd = lcdEnabled ? new lcd_1.LCD() : null;
-log(`LCD ${lcdEnabled ? "enabled" : "disabled"}`);
+const lcd = version_1.synthVersion === "1" ? new lcd_1.LCD() : new lcd2_1.LCD2();
 const lcdPrint = (msg, line) => {
     if (lcd) {
         return lcd.print((msg || "").replace(".sf2", "").padEnd(16, " "), line);

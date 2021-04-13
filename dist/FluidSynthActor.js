@@ -23,10 +23,9 @@ const main_1 = require("./main");
 const LcdControllerActor_1 = require("./LcdControllerActor");
 const SoundFontLibraryActor_1 = require("./SoundFontLibraryActor");
 const escape_path_with_spaces_1 = __importDefault(require("escape-path-with-spaces"));
-// import { startWebInterface } from "./web-ui";
 const priority = process.env.FLUIDSYNTH_PRIORITY || "0";
 const midiChannel = process.env.MIDI_CHANNEL || "15";
-const defaultFluidsynthArgs = "--sample-rate 48000 --gain 2 -o synth.polyphony=16" + os_1.default.type() === "Linux"
+const defaultFluidsynthArgs = "--sample-rate 48000 --gain 3 -o synth.polyphony=16" + os_1.default.type() === "Linux"
     ? " --audio-driver=alsa"
     : "";
 const argsFromEnv = process.env.FLUIDSYNTH_ARGS;

@@ -1,11 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Dial = void 0;
-const johnny_five_1 = __importDefault(require("johnny-five"));
-const board_1 = require("./board");
 const delay = parseInt(process.env.ROTARY_DELAY || "500", 10);
 let cycle = "DOWN";
 function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, onHold, }) {
@@ -78,20 +73,22 @@ function rotaryEncoder({ aPin, bPin, pressButton, onUp, onDown, onPress, onHold,
 }
 class Dial {
     constructor({ onDown, onPress, onUp, onHold, }) {
-        board_1.board().ready.then(() => {
-            const aPin = new johnny_five_1.default.Pin({
+        const five = require("johnny-five");
+        const { board } = require("./board");
+        board().ready.then(() => {
+            const aPin = new five.Pin({
                 pin: "GPIO4",
                 type: "digital",
                 mode: 0,
             });
-            const bPin = new johnny_five_1.default.Pin({
+            const bPin = new five.Pin({
                 pin: "GPIO5",
                 type: "digital",
                 mode: 0,
             });
             aPin.io.digitalWrite("GPIO4", aPin.io.HIGH);
             bPin.io.digitalWrite("GPIO5", bPin.io.HIGH);
-            const pressButton = new johnny_five_1.default.Button({ pin: "GPIO6", isPullup: true });
+            const pressButton = new five.Button({ pin: "GPIO6", isPullup: true });
             rotaryEncoder({
                 aPin,
                 bPin,

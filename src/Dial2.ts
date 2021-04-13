@@ -22,7 +22,7 @@ export class Dial2 {
         const makeButton = async (msg: string, pin: number, cb: () => void) => {
             console.log(`Creating pin ${pin}`)
             const p = pin.toString()
-            fs.writeFileSync('/sys/class/gpio/unexport', p)
+            cp.execSync(`echo ${p} > /sys/class/gpio/unexport`)
             // await delay(100)
             cp.execSync(`echo ${p} > /sys/class/gpio/export`) // May need to be done manually
             // await delay(100)
