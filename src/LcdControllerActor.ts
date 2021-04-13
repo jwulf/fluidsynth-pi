@@ -16,8 +16,6 @@ const log = Log(chalk.yellowBright);
 
 const lcd = synthVersion === "1" ? new LCD() : new LCD2();
 
-log(`Synth version: ${synthVersion ? "enabled" : "disabled"}`);
-
 const lcdPrint = (msg: string, line: number) => {
   if (lcd) {
     return lcd.print((msg || "").replace(".sf2", "").padEnd(16, " "), line);
