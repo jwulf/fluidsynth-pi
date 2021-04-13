@@ -21,7 +21,9 @@ class Dial2 {
         const makeButton = (msg, pin, cb) => __awaiter(this, void 0, void 0, function* () {
             console.log(`Creating pin ${pin}`);
             const p = pin.toString();
-            child_process_1.default.execSync(`echo ${p} > /sys/class/gpio/unexport`);
+            if (fs_1.default.existsSync(`/sys/class/gpio/gpio${p}`)) {
+                child_process_1.default.execSync(`echo ${p} > /sys/class/gpio/unexport`);
+            }
             // await delay(100)
             child_process_1.default.execSync(`echo ${p} > /sys/class/gpio/export`); // May need to be done manually
             // await delay(100)
