@@ -14,7 +14,6 @@ import { LcdControllerActorMessages } from "./LcdControllerActor";
 import { fontExists, SoundFontEntry } from "./SoundFontLibraryActor";
 import { CollectionItem } from "./Collection";
 import escape from "escape-path-with-spaces";
-// import { startWebInterface } from "./web-ui";
 
 const priority = process.env.FLUIDSYNTH_PRIORITY || "0";
 
