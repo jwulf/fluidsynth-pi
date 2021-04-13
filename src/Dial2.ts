@@ -1,4 +1,5 @@
 import fs from "fs"
+import cp from "child_process"
 
 type Handler = () => void;
 
@@ -23,7 +24,7 @@ export class Dial2 {
             const p = pin.toString()
             fs.writeFileSync('/sys/class/gpio/unexport', p)
             // await delay(100)
-            fs.writeFileSync('/sys/class/gpio/export', p) // May need to be done manually
+            cp.execSync(`echo ${p} > /sys/class/gpio/export`) // May need to be done manually
             // await delay(100)
             fs.writeFileSync(`/sys/class/gpio/gpio${p}/direction`, 'in')
 
