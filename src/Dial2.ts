@@ -3,7 +3,11 @@ import cp from "child_process"
 
 type Handler = () => void;
 
+const rpio = require("rpio")
+const { LOW } = rpio
+
 export class Dial2 {
+    buffer: any;
 
     constructor({
         onDown,
@@ -19,16 +23,17 @@ export class Dial2 {
 
         const pins: { number: number, cb: () => void, pressed: boolean }[] = [];
 
-        const makeButton = async (msg: string, pin: number, cb: () => void) => {
+        const makeButton = async ({ msg, pin, cb }: { msg: string, pin: number, cb: () => void }) => {
             console.log(`Creating pin ${pin}`)
-            const p = pin.toString()
-            if (fs.existsSync(`/sys/class/gpio/gpio${p}`)) {
-                cp.execSync(`echo ${p} > /sys/class/gpio/unexport`)
-            }
-            // await delay(100)
-            cp.execSync(`echo ${p} > /sys/class/gpio/export`) // May need to be done manually
-            // await delay(100)
-            fs.writeFileSync(`/sys/class/gpio/gpio${p}/direction`, 'in')
+            rpio.open(pin, rpio.INPUT, rpio.PULL_UP)
+            // const p = pin.toString()
+            // if (fs.existsSync(`/sys/class/gpio/gpio${p}`)) {
+            //     cp.execSync(`echo ${p} > /sys/class/gpio/unexport`)
+            // }
+            // // await delay(100)
+            // cp.execSync(`echo ${p} > /sys/class/gpio/export`) // May need to be done manually
+            // // await delay(100)
+            // fs.writeFileSync(`/sys/class/gpio/gpio${p}/direction`, 'in')
 
             pins.push({
                 number: pin,
@@ -42,27 +47,27 @@ export class Dial2 {
 
         setInterval(() => {
             pins.forEach(pin => {
-                const state = fs.readFileSync(`/sys/class/gpio/gpio${pin.number}/value`, 'utf8')
-                if (state[0] === '0') {
-                    if (!pin.pressed) {
-                        pin.pressed = true
-                        pin.cb()
-                    }
-                } else {
+                const l = rpio.read(pin.number)
+                // console.log(b, l)
+                if (l !== LOW) {
                     pin.pressed = false
+                    return
+                }
+                if (!pin.pressed) {
+                    pin.pressed = true
+                    pin.cb()
                 }
             })
         }, 200)
 
+        makeButton({ msg: "up", pin: 6, cb: onHold });
+        makeButton({ msg: "down", pin: 19, cb: () => { } })
+        makeButton({ msg: "left", pin: 5, cb: onDown })
+        makeButton({ msg: "right", pin: 26, cb: onUp })
+        makeButton({ msg: "press", pin: 13, cb: onPress })
 
-        makeButton("up", 6, onHold);
-        makeButton("down", 19, () => { })
-        makeButton("left", 5, onDown)
-        makeButton("right", 26, onUp)
-        makeButton("press", 13, onPress)
-
-        makeButton("key1", 21, onHold)
-        makeButton("key2", 20, () => { })
-        makeButton("key3", 16, () => { })
+        makeButton({ msg: "key1", pin: 21, cb: onHold })
+        makeButton({ msg: "key2", pin: 20, cb: () => { } })
+        makeButton({ msg: "key3", pin: 16, cb: () => { } })
     }
 }

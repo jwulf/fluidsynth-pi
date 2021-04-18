@@ -66,7 +66,10 @@ export const LcdController = (root: any) => {
         }
       }
     },
-    Actor.LcdController
+    Actor.LcdController,
+    {
+      onCrash: (msg, error, ctx) => ctx.resume
+    }
   );
   const toastRemover = LcdToastRemover(actor);
   return actor as Ref<Message>;

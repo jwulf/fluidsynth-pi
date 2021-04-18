@@ -5,7 +5,7 @@ console.log(__dirname)
 
 const q = queue(() => {
     console.log(new Date())
-    const res = cp.execSync('rsync -zav ../dist root@dietpi.local:~/fluidsynth-pi/')
+    const res = cp.execSync('rsync -zav ../dist root@dietpi4.local:~/fluidsynth-pi/')
     console.log(res.toString())
 }, 1)
 

@@ -8,26 +8,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Dial2 = void 0;
-const fs_1 = __importDefault(require("fs"));
-const child_process_1 = __importDefault(require("child_process"));
+const rpio = require("rpio");
+const { LOW } = rpio;
 class Dial2 {
     constructor({ onDown, onPress, onUp, onHold, }) {
         const pins = [];
-        const makeButton = (msg, pin, cb) => __awaiter(this, void 0, void 0, function* () {
+        const makeButton = ({ msg, pin, cb }) => __awaiter(this, void 0, void 0, function* () {
             console.log(`Creating pin ${pin}`);
-            const p = pin.toString();
-            if (fs_1.default.existsSync(`/sys/class/gpio/gpio${p}`)) {
-                child_process_1.default.execSync(`echo ${p} > /sys/class/gpio/unexport`);
-            }
-            // await delay(100)
-            child_process_1.default.execSync(`echo ${p} > /sys/class/gpio/export`); // May need to be done manually
-            // await delay(100)
-            fs_1.default.writeFileSync(`/sys/class/gpio/gpio${p}/direction`, 'in');
+            rpio.open(pin, rpio.INPUT, rpio.PULL_UP);
+            // const p = pin.toString()
+            // if (fs.existsSync(`/sys/class/gpio/gpio${p}`)) {
+            //     cp.execSync(`echo ${p} > /sys/class/gpio/unexport`)
+            // }
+            // // await delay(100)
+            // cp.execSync(`echo ${p} > /sys/class/gpio/export`) // May need to be done manually
+            // // await delay(100)
+            // fs.writeFileSync(`/sys/class/gpio/gpio${p}/direction`, 'in')
             pins.push({
                 number: pin,
                 cb: () => {
@@ -39,26 +37,26 @@ class Dial2 {
         });
         setInterval(() => {
             pins.forEach(pin => {
-                const state = fs_1.default.readFileSync(`/sys/class/gpio/gpio${pin.number}/value`, 'utf8');
-                if (state[0] === '0') {
-                    if (!pin.pressed) {
-                        pin.pressed = true;
-                        pin.cb();
-                    }
-                }
-                else {
+                const l = rpio.read(pin.number);
+                // console.log(b, l)
+                if (l !== LOW) {
                     pin.pressed = false;
+                    return;
+                }
+                if (!pin.pressed) {
+                    pin.pressed = true;
+                    pin.cb();
                 }
             });
         }, 200);
-        makeButton("up", 6, onHold);
-        makeButton("down", 19, () => { });
-        makeButton("left", 5, onDown);
-        makeButton("right", 26, onUp);
-        makeButton("press", 13, onPress);
-        makeButton("key1", 21, onHold);
-        makeButton("key2", 20, () => { });
-        makeButton("key3", 16, () => { });
+        makeButton({ msg: "up", pin: 6, cb: onHold });
+        makeButton({ msg: "down", pin: 19, cb: () => { } });
+        makeButton({ msg: "left", pin: 5, cb: onDown });
+        makeButton({ msg: "right", pin: 26, cb: onUp });
+        makeButton({ msg: "press", pin: 13, cb: onPress });
+        makeButton({ msg: "key1", pin: 21, cb: onHold });
+        makeButton({ msg: "key2", pin: 20, cb: () => { } });
+        makeButton({ msg: "key3", pin: 16, cb: () => { } });
     }
 }
 exports.Dial2 = Dial2;

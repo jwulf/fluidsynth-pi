@@ -54,19 +54,24 @@ async function actorFn(
       ? state
       : await loadFont(state, msg.font);
 
+    let instruments: SoundFontEntry[] = []
     const listener = (data: Buffer) => {
       const lines = data.toString().split("\n");
-      lines.shift();
-      const instruments: SoundFontEntry[] = lines
+      if (lines[0].startsWith(`> inst`)) {
+        lines.shift();
+      }
+      instruments = [...instruments, ...lines
         ?.map((l) => ({
           bank: parseInt(l.substr(0, 3), 10),
           instrument: parseInt(l.substr(4, 3), 10),
           displayName: l.substring(8),
           filename: msg.font.filename,
         }))
-        .filter((s) => !isNaN(s.bank));
-      state.process.stdout.removeListener("data", listener);
-      return dispatch(msg.sender, instruments);
+        .filter((s) => !isNaN(s.bank))];
+      if (lines[lines.length - 1].startsWith('> ')) {
+        state.process.stdout.removeListener("data", listener);
+        return dispatch(msg.sender, instruments);
+      }
     };
     state.process.stdout.on("data", listener);
     state.process.stdin.write(`inst ${loadedFontCount}\n`);
@@ -202,6 +207,7 @@ function startSynth(state: FluidSynthState) {
         blockForReady = false;
         if (os.type() === "Linux") {
           try {
+            log(`Running aconnect ${aconnectArgs}`)
             cp.execSync(`aconnect ${aconnectArgs}`);
           } catch (e) {
             return reject(e.toString());

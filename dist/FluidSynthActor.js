@@ -50,17 +50,22 @@ function actorFn(state = { loadedFontCount: 0 }, msg, ctx) {
             const { loadedFont, loadedFontCount } = fontAlreadyLoaded
                 ? state
                 : yield loadFont(state, msg.font);
+            let instruments = [];
             const listener = (data) => {
                 const lines = data.toString().split("\n");
-                lines.shift();
-                const instruments = lines === null || lines === void 0 ? void 0 : lines.map((l) => ({
-                    bank: parseInt(l.substr(0, 3), 10),
-                    instrument: parseInt(l.substr(4, 3), 10),
-                    displayName: l.substring(8),
-                    filename: msg.font.filename,
-                })).filter((s) => !isNaN(s.bank));
-                state.process.stdout.removeListener("data", listener);
-                return nact_1.dispatch(msg.sender, instruments);
+                if (lines[0].startsWith(`> inst`)) {
+                    lines.shift();
+                }
+                instruments = [...instruments, ...lines === null || lines === void 0 ? void 0 : lines.map((l) => ({
+                        bank: parseInt(l.substr(0, 3), 10),
+                        instrument: parseInt(l.substr(4, 3), 10),
+                        displayName: l.substring(8),
+                        filename: msg.font.filename,
+                    })).filter((s) => !isNaN(s.bank))];
+                if (lines[lines.length - 1].startsWith('> ')) {
+                    state.process.stdout.removeListener("data", listener);
+                    return nact_1.dispatch(msg.sender, instruments);
+                }
             };
             state.process.stdout.on("data", listener);
             state.process.stdin.write(`inst ${loadedFontCount}\n`);
@@ -174,6 +179,7 @@ function startSynth(state) {
                 blockForReady = false;
                 if (os_1.default.type() === "Linux") {
                     try {
+                        log(`Running aconnect ${aconnectArgs}`);
                         child_process_1.default.execSync(`aconnect ${aconnectArgs}`);
                     }
                     catch (e) {

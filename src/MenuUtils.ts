@@ -6,6 +6,9 @@ import {
 import { CollectionItem, Cursor } from "./Collection";
 import { LcdControllerActorMessages } from "./LcdControllerActor";
 import { lcdController } from "./main";
+import { synthVersion } from "./version";
+
+const arrow = synthVersion === "1" ? ':arrowright' : '►'
 
 export function makeDisplayName(
   scrolling: boolean,
@@ -14,8 +17,8 @@ export function makeDisplayName(
   return cursor?.item === null
     ? "Empty"
     : scrolling
-    ? cursor?.item?.displayName || "Unknown"
-    : `:arrowright: ${cursor?.item?.displayName?.padEnd(14, " ")}`;
+      ? cursor?.item?.displayName || "Unknown"
+      : `${arrow} ${cursor?.item?.displayName?.padEnd(14, " ")}`;
 }
 
 export function updateDisplay(

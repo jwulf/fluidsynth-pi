@@ -56,7 +56,9 @@ const LcdController = (root) => {
                 return Object.assign(Object.assign({}, state), { activeToast: undefined });
             }
         }
-    }, ActorConstants_1.Actor.LcdController);
+    }, ActorConstants_1.Actor.LcdController, {
+        onCrash: (msg, error, ctx) => ctx.resume
+    });
     const toastRemover = LcdToastActor_1.LcdToastRemover(actor);
     return actor;
 };

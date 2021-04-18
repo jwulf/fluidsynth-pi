@@ -5,13 +5,15 @@ const nact_1 = require("nact");
 const ActorConstants_1 = require("./ActorConstants");
 const LcdControllerActor_1 = require("./LcdControllerActor");
 const main_1 = require("./main");
+const version_1 = require("./version");
+const arrow = version_1.synthVersion === "1" ? ':arrowright' : '►';
 function makeDisplayName(scrolling, cursor) {
     var _a, _b, _c;
     return (cursor === null || cursor === void 0 ? void 0 : cursor.item) === null
         ? "Empty"
         : scrolling
             ? ((_a = cursor === null || cursor === void 0 ? void 0 : cursor.item) === null || _a === void 0 ? void 0 : _a.displayName) || "Unknown"
-            : `:arrowright: ${(_c = (_b = cursor === null || cursor === void 0 ? void 0 : cursor.item) === null || _b === void 0 ? void 0 : _b.displayName) === null || _c === void 0 ? void 0 : _c.padEnd(14, " ")}`;
+            : `${arrow} ${(_c = (_b = cursor === null || cursor === void 0 ? void 0 : cursor.item) === null || _b === void 0 ? void 0 : _b.displayName) === null || _c === void 0 ? void 0 : _c.padEnd(14, " ")}`;
 }
 exports.makeDisplayName = makeDisplayName;
 function updateDisplay(lcdController, text, menuTitle = "") {
